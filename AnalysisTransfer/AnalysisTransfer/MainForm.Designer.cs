@@ -29,6 +29,8 @@
         private void InitializeComponent()
         {
             this.transmissionDisplay1 = new TransmissionDisplay.TransmissionDisplay();
+            this.transmissionDataList1 = new TransmissionDataList.TransmissionDataList();
+            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.SuspendLayout();
             // 
             // transmissionDisplay1
@@ -36,24 +38,45 @@
             this.transmissionDisplay1.Dock = System.Windows.Forms.DockStyle.Top;
             this.transmissionDisplay1.Location = new System.Drawing.Point(0, 0);
             this.transmissionDisplay1.Name = "transmissionDisplay1";
-            this.transmissionDisplay1.Size = new System.Drawing.Size(800, 377);
+            this.transmissionDisplay1.Size = new System.Drawing.Size(1403, 377);
             this.transmissionDisplay1.TabIndex = 0;
+            // 
+            // transmissionDataList1
+            // 
+            this.transmissionDataList1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.transmissionDataList1.Location = new System.Drawing.Point(0, 377);
+            this.transmissionDataList1.Name = "transmissionDataList1";
+            this.transmissionDataList1.Size = new System.Drawing.Size(1403, 284);
+            this.transmissionDataList1.TabIndex = 1;
+            // 
+            // statusStrip1
+            // 
+            this.statusStrip1.Location = new System.Drawing.Point(0, 639);
+            this.statusStrip1.Name = "statusStrip1";
+            this.statusStrip1.Size = new System.Drawing.Size(1403, 22);
+            this.statusStrip1.TabIndex = 2;
+            this.statusStrip1.Text = "statusStrip1";
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(1403, 661);
+            this.Controls.Add(this.statusStrip1);
+            this.Controls.Add(this.transmissionDataList1);
             this.Controls.Add(this.transmissionDisplay1);
             this.Name = "MainForm";
             this.Text = "Form1";
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
 
         private TransmissionDisplay.TransmissionDisplay transmissionDisplay1;
+        private TransmissionDataList.TransmissionDataList transmissionDataList1;
+        private System.Windows.Forms.StatusStrip statusStrip1;
     }
 }
 

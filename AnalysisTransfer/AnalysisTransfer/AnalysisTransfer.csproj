@@ -79,6 +79,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\TransmissionDataList\TransmissionDataList.csproj">
+      <Project>{B91FE0A0-A96F-4825-81DF-9595CE97F2EC}</Project>
+      <Name>TransmissionDataList</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TransmissionDisplay\TransmissionDisplay.csproj">
       <Project>{BCCAE406-16AA-42BA-8474-BEB81ECF3B8E}</Project>
       <Name>TransmissionDisplay</Name>
