@@ -78,5 +78,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TransmissionDisplay\TransmissionDisplay.csproj">
+      <Project>{BCCAE406-16AA-42BA-8474-BEB81ECF3B8E}</Project>
+      <Name>TransmissionDisplay</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

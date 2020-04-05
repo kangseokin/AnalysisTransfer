@@ -28,13 +28,23 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.transmissionDisplay1 = new TransmissionDisplay.TransmissionDisplay();
             this.SuspendLayout();
+            // 
+            // transmissionDisplay1
+            // 
+            this.transmissionDisplay1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.transmissionDisplay1.Location = new System.Drawing.Point(0, 0);
+            this.transmissionDisplay1.Name = "transmissionDisplay1";
+            this.transmissionDisplay1.Size = new System.Drawing.Size(800, 377);
+            this.transmissionDisplay1.TabIndex = 0;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.transmissionDisplay1);
             this.Name = "MainForm";
             this.Text = "Form1";
             this.ResumeLayout(false);
@@ -42,6 +52,8 @@
         }
 
         #endregion
+
+        private TransmissionDisplay.TransmissionDisplay transmissionDisplay1;
     }
 }
 
