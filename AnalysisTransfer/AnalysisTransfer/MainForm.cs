@@ -204,7 +204,7 @@ namespace AnalysisTransfer
 
                     sumii += 12;
 
-                    if ((EleIndex + sumii + 5+ 7) < TransReadData.Length) 
+                    if ((EleIndex + sumii + 5+ 7) > TransReadData.Length) 
                     {
                         break;
                     }
@@ -374,10 +374,10 @@ namespace AnalysisTransfer
 
                     break;
 
-                case "Ca":
+                case "CA":
                     AnalysisData.Ca_Data = Value;
 
-                    MessageBox.Show("Ca : " + AnalysisData.N_Data.ToString());
+                    MessageBox.Show("Ca : " + AnalysisData.Ca_Data.ToString());
 
                     break;
 
