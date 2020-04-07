@@ -46,7 +46,36 @@ namespace BTProductionInformation
         {
             InitializeComponent();
 
+            
+        }
+        private void BTProductionInformation_Load(object sender, EventArgs e)
+        {
             Open();
+            timer1.Start();
+        }
+        protected override void OnCreateControl()
+        {
+            base.OnCreateControl();
+            this.ParentForm.FormClosing += new FormClosingEventHandler(ParentForm_FormClosing);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void ParentForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            //if (MessageBox.Show("是否关闭父窗体?", "关闭父窗体?",
+            //    MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.No)
+            //{
+            //    e.Cancel = true;
+            //}
+            timer1.Stop();
+
+            Close();
+
+            e.Cancel = true;
         }
 
         // 데이터베이스 열기
@@ -214,7 +243,7 @@ namespace BTProductionInformation
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            //화면의전광판에내용을표시();
+            화면의전광판에내용을표시();
         }
 
         /// <summary>
@@ -378,5 +407,8 @@ namespace BTProductionInformation
             HDR_PreLotNo = HDR_LotNo;
             */
         }
+
+        
     }
 }
+
