@@ -28,6 +28,10 @@
         /// </summary>
         private void InitializeComponent()
         {
+<<<<<<< HEAD
+            this.components = new System.ComponentModel.Container();
+=======
+>>>>>>> 913e78cfca6abdbe019a08fb921177a8aadbade6
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
@@ -46,6 +50,10 @@
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
+<<<<<<< HEAD
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
+=======
+>>>>>>> 913e78cfca6abdbe019a08fb921177a8aadbade6
             this.groupBox1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.tabControl1.SuspendLayout();
@@ -291,6 +299,15 @@
             this.button2.Text = "108";
             this.button2.UseVisualStyleBackColor = true;
             // 
+<<<<<<< HEAD
+            // timer1
+            // 
+            this.timer1.Enabled = true;
+            this.timer1.Interval = 1000;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
+=======
+>>>>>>> 913e78cfca6abdbe019a08fb921177a8aadbade6
             // BTProductionInformation
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
@@ -330,5 +347,9 @@
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
+<<<<<<< HEAD
+        private System.Windows.Forms.Timer timer1;
+=======
+>>>>>>> 913e78cfca6abdbe019a08fb921177a8aadbade6
     }
 }
