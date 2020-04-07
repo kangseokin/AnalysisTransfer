@@ -20,7 +20,7 @@ namespace BTProductionInformation
         const string Server_DB1 = "ERP";
         const string Server_DB2 = "ERP10HKJ";
 
-        string ConnectionStringERP = "Server=" + Server_IP + ";uid=" + Server_ID + ";password=" + Server_PW + ";database=" + Server_DB1 + ";Connect Timeout=3000";
+        //string ConnectionStringERP = "Server=" + Server_IP + ";uid=" + Server_ID + ";password=" + Server_PW + ";database=" + Server_DB1 + ";Connect Timeout=3000";
         string ConnectionStringERP10GG0 = "Server=" + Server_IP + ";uid=" + Server_ID + ";password=" + Server_PW + ";database=" + Server_DB2 + ";Connect Timeout=3000";
         string ConnectionStringQCMANAGER_Data = "Server= HK ;uid= hkqcuser;password= hkqcuser;database=hkqcdb ;Connect Timeout=3000";
 
@@ -28,15 +28,15 @@ namespace BTProductionInformation
         SqlConnection QCMANAGER_Data_conn;
 
         string YEONJU_LotNo;
-        string YEONJU_PreLotNo;
+        //string YEONJU_PreLotNo;
         int YEONJU_Count;
 
-        int YEONJU_PreCount;
+        //int YEONJU_PreCount;
 
         string HDR_LotNo;
-        string HDR_PreLotNo;
+        //string HDR_PreLotNo;
         int HDR_Count;
-        int HDR_PreCount;
+        //int HDR_PreCount;
 
         string HCNM_Data;
         string YKWGI_Data;
@@ -45,14 +45,16 @@ namespace BTProductionInformation
         public BTProductionInformation()
         {
             InitializeComponent();
-
-            
         }
+
         private void BTProductionInformation_Load(object sender, EventArgs e)
         {
             Open();
+
             timer1.Start();
         }
+
+        //UserControl의 종료 이벤트를 생성시키는 부분
         protected override void OnCreateControl()
         {
             base.OnCreateControl();
@@ -60,7 +62,7 @@ namespace BTProductionInformation
         }
 
         /// <summary>
-        /// 
+        /// //종료 이벤트를 처리하는 부분
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -76,7 +78,7 @@ namespace BTProductionInformation
 
             Close();
 
-            e.Cancel = true;
+            //e.Cancel = false;
         }
 
         // 데이터베이스 열기
@@ -261,15 +263,19 @@ namespace BTProductionInformation
         /// </summary>
         private void 화면의전광판에내용을표시()
         {
-            ERPDataBase_GetYEONJUCount(out YEONJU_LotNo, out YEONJU_Count);
+            //카운트 데이터 가져오기
+            ERPDataBase_GetYEONJUCount(out YEONJU_LotNo, out YEONJU_Count); //연주 절단 카운트 가져오기
 
-            ERPDataBase_GetHDRCount(out HDR_LotNo, out HDR_Count);
+            ERPDataBase_GetHDRCount(out HDR_LotNo, out HDR_Count); //압연 HDR 장입 카운트 가져오기
 
-            QCMANAGERData_GetLotData(YEONJU_LotNo, out GJGB_Data, out HCNM_Data, out YKWGI_Data);
+            QCMANAGERData_GetLotData(YEONJU_LotNo, out GJGB_Data, out HCNM_Data, out YKWGI_Data); //생산 정보 가져오기
 
+            // 카운트 표시
+            button1.Text = YEONJU_Count.ToString();
+            
+            button2.Text = HDR_Count.ToString();
 
-            MessageBox.Show(YEONJU_LotNo);
-
+            //MessageBox.Show(YEONJU_LotNo);
 
             //label2.Text = YEONJU_LotNo;
 
@@ -277,13 +283,14 @@ namespace BTProductionInformation
 
             //HDR_PreCount = HDR_Count;
 
-            label2.Text = YEONJU_LotNo;
+            // 생산 정보 표시
+            label2.Text = YEONJU_LotNo; //HeatNO
 
-            label4.Text = HCNM_Data;
+            label4.Text = HCNM_Data;   //호칭
 
-            label6.Text = YKWGI_Data;
+            label6.Text = YKWGI_Data;  //길이
 
-            label8.Text = GJGB_Data;
+            label8.Text = GJGB_Data;    //강종
 
             if ((string.Compare(YEONJU_LotNo, HDR_LotNo)) == 0)
             {
