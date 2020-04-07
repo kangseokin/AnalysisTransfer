@@ -80,12 +80,9 @@
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.transmissionDisplay1);
             this.Name = "MainForm";
-
-            this.Text = "7";
-
             this.Text = "Form1";
-
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
