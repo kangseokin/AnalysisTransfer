@@ -217,7 +217,7 @@
             this.groupBox2.ForeColor = System.Drawing.Color.Blue;
             this.groupBox2.Location = new System.Drawing.Point(357, 3);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Padding = new System.Windows.Forms.Padding(40, 20, 40, 20);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(40, 20, 40, 10);
             this.groupBox2.Size = new System.Drawing.Size(407, 303);
             this.groupBox2.TabIndex = 1;
             this.groupBox2.TabStop = false;
@@ -230,9 +230,8 @@
             this.button1.ForeColor = System.Drawing.Color.Black;
             this.button1.Location = new System.Drawing.Point(40, 57);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(327, 226);
+            this.button1.Size = new System.Drawing.Size(327, 236);
             this.button1.TabIndex = 0;
-            this.button1.Text = "148";
             this.button1.UseVisualStyleBackColor = true;
             // 
             // groupBox3
@@ -243,7 +242,7 @@
             this.groupBox3.ForeColor = System.Drawing.Color.Blue;
             this.groupBox3.Location = new System.Drawing.Point(770, 3);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Padding = new System.Windows.Forms.Padding(40, 20, 40, 20);
+            this.groupBox3.Padding = new System.Windows.Forms.Padding(40, 20, 40, 10);
             this.groupBox3.Size = new System.Drawing.Size(407, 303);
             this.groupBox3.TabIndex = 2;
             this.groupBox3.TabStop = false;
@@ -256,9 +255,8 @@
             this.button2.ForeColor = System.Drawing.Color.Black;
             this.button2.Location = new System.Drawing.Point(40, 57);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(327, 226);
+            this.button2.Size = new System.Drawing.Size(327, 236);
             this.button2.TabIndex = 1;
-            this.button2.Text = "108";
             this.button2.UseVisualStyleBackColor = true;
             // 
             // tabControl1
