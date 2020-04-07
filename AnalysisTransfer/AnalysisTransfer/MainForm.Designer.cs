@@ -31,13 +31,16 @@
             this.transmissionDisplay1 = new TransmissionDisplay.TransmissionDisplay();
             this.transmissionDataList1 = new TransmissionDataList.TransmissionDataList();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.btProductionInformation1 = new BTProductionInformation.BTProductionInformation();
             this.SuspendLayout();
             // 
             // transmissionDisplay1
             // 
             this.transmissionDisplay1.Dock = System.Windows.Forms.DockStyle.Top;
             this.transmissionDisplay1.Location = new System.Drawing.Point(0, 0);
+            this.transmissionDisplay1.Margin = new System.Windows.Forms.Padding(5);
             this.transmissionDisplay1.Name = "transmissionDisplay1";
+            this.transmissionDisplay1.Padding = new System.Windows.Forms.Padding(3);
             this.transmissionDisplay1.Size = new System.Drawing.Size(1403, 377);
             this.transmissionDisplay1.TabIndex = 0;
             // 
@@ -46,27 +49,39 @@
             this.transmissionDataList1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.transmissionDataList1.Location = new System.Drawing.Point(0, 377);
             this.transmissionDataList1.Name = "transmissionDataList1";
-            this.transmissionDataList1.Size = new System.Drawing.Size(1403, 284);
+            this.transmissionDataList1.Padding = new System.Windows.Forms.Padding(3);
+            this.transmissionDataList1.Size = new System.Drawing.Size(1403, 279);
             this.transmissionDataList1.TabIndex = 1;
             // 
             // statusStrip1
             // 
-            this.statusStrip1.Location = new System.Drawing.Point(0, 639);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 924);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(1403, 22);
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
+            // btProductionInformation1
+            // 
+            this.btProductionInformation1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.btProductionInformation1.Location = new System.Drawing.Point(0, 656);
+            this.btProductionInformation1.Name = "btProductionInformation1";
+            this.btProductionInformation1.Padding = new System.Windows.Forms.Padding(3);
+            this.btProductionInformation1.Size = new System.Drawing.Size(1403, 268);
+            this.btProductionInformation1.TabIndex = 3;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1403, 661);
-            this.Controls.Add(this.statusStrip1);
+            this.ClientSize = new System.Drawing.Size(1403, 946);
             this.Controls.Add(this.transmissionDataList1);
+            this.Controls.Add(this.btProductionInformation1);
+            this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.transmissionDisplay1);
             this.Name = "MainForm";
             this.Text = "Form1";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -77,6 +92,7 @@
         private TransmissionDisplay.TransmissionDisplay transmissionDisplay1;
         private TransmissionDataList.TransmissionDataList transmissionDataList1;
         private System.Windows.Forms.StatusStrip statusStrip1;
+        private BTProductionInformation.BTProductionInformation btProductionInformation1;
     }
 }
 
