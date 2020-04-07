@@ -72,6 +72,7 @@ namespace BTProductionInformation
             //    e.Cancel = true;
             //}
             timer1.Stop();
+            timer1.Enabled = false;
 
             Close();
 
