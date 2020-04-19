@@ -38,6 +38,7 @@ namespace AnalysisTransfer
         private void MainForm_Load(object sender, EventArgs e)
         {
             비동기소켓서버시작();
+            SerialCommINI();
         }
 
         private void 비동기소켓서버시작()
