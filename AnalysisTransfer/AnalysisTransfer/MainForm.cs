@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
+using System.IO.Ports;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -14,10 +16,18 @@ namespace AnalysisTransfer
 {
     public partial class MainForm : Form
     {
-
+        //비동기 소켓
         private Socket m_ServerSocket;
         private List<Socket> m_ClientSocket;
         private byte[] szData;
+
+        //시리얼 포트
+        string SerialPortName;
+        int SerialBaudRate;
+        int SerialDataBits;
+        StopBits SerialStopBits;
+        Parity SerialParity;
+        Handshake SerialHandshake;
 
         public MainForm()
         {
@@ -403,6 +413,54 @@ namespace AnalysisTransfer
             return true;
         }
 
+
+
         
+
+        /// <summary>
+        /// 시리얼포트에 대한 기본 환경설정(INI)을 불려오거나 새로 만든다.
+        /// --------------------------------------------------------------
+        /// * 아래의 변수가 있어야 한다.
+        ///   string    SerialPortName;
+        ///   int       SerialBaudRate;
+        ///   int       SerialDataBits;
+        ///   StopBits  SerialStopBits;
+        ///   Parity    SerialParity;
+        ///   Handshake SerialHandshake;
+        /// </summary>
+        public void SerialCommINI()
+        {
+            string INIFilePath = Application.StartupPath + @"\\Serial.INI";
+
+            FileInfo INIFileInfo = new FileInfo(INIFilePath);
+            
+            if( INIFileInfo.Exists)  //파일이 있는지 확인, 있을때(true), 없으면(false)
+            {
+                IniFile SerialINI = new IniFile();
+                // ini 읽기
+                SerialINI.Load(INIFilePath);
+                
+                SerialPortName = SerialINI["시리얼포트"]["포트"].ToString();
+                SerialBaudRate = SerialINI["시리얼포트"]["속도"].ToInt();
+                SerialDataBits = SerialINI["시리얼포트"]["데이터"].ToInt();
+                SerialParity = (Parity)SerialINI["시리얼포트"]["패리티"].ToInt();
+                SerialStopBits = (StopBits)SerialINI["시리얼포트"]["정지"].ToInt();
+                SerialHandshake = (Handshake)SerialINI["시리얼포트"]["핸드세이크"].ToInt();
+
+            }
+            else  //설정 파일이 없으므로 기본 설정을 지정하여 새로 만든다.
+            {
+                IniFile SerialINI = new IniFile();
+
+                SerialINI["시리얼포트"]["포트"] = "COM1";
+                SerialINI["시리얼포트"]["속도"] = "9600";
+                SerialINI["시리얼포트"]["데이터"] = "8";
+                SerialINI["시리얼포트"]["패리티"] = (int)Parity.None;
+                SerialINI["시리얼포트"]["정지"] = (int)StopBits.None;
+                SerialINI["시리얼포트"]["핸드세이크"] = (int)Handshake.None;
+
+                SerialINI.Save(INIFilePath);
+            }
+        }
     }
 }
