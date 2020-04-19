@@ -307,7 +307,8 @@ namespace BTProductionInformation
             {
                 groupBox2.Text = "연주 절단 카운트(" + YEONJU_LotNo + ")";
 
-                groupBox3.Text = "압연 HDR 장입 카운트(" + HDR_LotNo + ")";
+                if(HDR_LotNo=="") groupBox3.Text = "압연 HDR 장입 카운트";
+                else groupBox3.Text = "압연 HDR 장입 카운트(" + HDR_LotNo + ")";
 
                 //아래 코드는 회사에서 확인을 해서 다시 작성...
                 /*
