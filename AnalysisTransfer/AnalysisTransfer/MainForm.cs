@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.IO.Ports;
@@ -11,6 +12,9 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+
+//using System.IO.Ports;
+using SerialCommLib;
 
 namespace AnalysisTransfer
 {
@@ -22,6 +26,8 @@ namespace AnalysisTransfer
         private byte[] szData;
 
         //시리얼 포트
+        SerialComm serial = new SerialComm();
+
         string SerialPortName;
         int SerialBaudRate;
         int SerialDataBits;
@@ -38,7 +44,20 @@ namespace AnalysisTransfer
         private void MainForm_Load(object sender, EventArgs e)
         {
             비동기소켓서버시작();
-            SerialCommINI();
+
+            //SerialCommINI();
+            SerialPortName = "COM3";
+            SerialBaudRate = 9600;
+            SerialDataBits = 8;
+            SerialParity = Parity.None;
+            SerialStopBits = StopBits.One;
+            SerialHandshake = Handshake.None;
+
+            //MessageBox.Show("[\0\0\0\0]");
+            serial.DataReceivedHandler = DataReceivedHandler;
+            serial.DisconnectedHandler = DisconnectedHandler;
+
+            serial.OpenComm(SerialPortName, SerialBaudRate, SerialDataBits, SerialStopBits, SerialParity, SerialHandshake);
         }
 
         private void 비동기소켓서버시작()
@@ -48,19 +67,20 @@ namespace AnalysisTransfer
             //------------------------------------------------------------------
             m_ClientSocket = new List<Socket>();
 
-            m_ServerSocket = new Socket(
-            AddressFamily.InterNetwork,
-            SocketType.Stream,
-            ProtocolType.Tcp);
+            m_ServerSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            
             IPEndPoint ipep = new IPEndPoint(IPAddress.Any, 7222);
+            
             m_ServerSocket.Bind(ipep);
+            
             m_ServerSocket.Listen(20);
 
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-            args.Completed
-            += new EventHandler<SocketAsyncEventArgs>(Accept_Completed);
+            args.Completed += new EventHandler<SocketAsyncEventArgs>(Accept_Completed);
             m_ServerSocket.AcceptAsync(args);
+            
             //-------------------------------------------------------------------
+
         }
 
         private void Accept_Completed(object sender, SocketAsyncEventArgs e)
@@ -74,12 +94,21 @@ namespace AnalysisTransfer
                 szData = new byte[1024];
                 args.SetBuffer(szData, 0, 1024);
                 args.UserToken = m_ClientSocket;
-                args.Completed
-                += new EventHandler<SocketAsyncEventArgs>(Receive_Completed);
+                args.Completed += new EventHandler<SocketAsyncEventArgs>(Receive_Completed);
                 ClientSocket.ReceiveAsync(args);
             }
             e.AcceptSocket = null;
-            m_ServerSocket.AcceptAsync(e);
+            try
+            {
+                m_ServerSocket.AcceptAsync(e);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Accept_Completed의 m_ServerSocket.AcceptAsync(e);에서 에러 발생, " + ex.ToString());
+            }
+            //Debug.WriteLine(m_ServerSocket.AcceptAsync(e) + "이 부분 실행");
+            //m_ServerSocket.EndAccept()
+
         }
 
         private void Receive_Completed(object sender, SocketAsyncEventArgs e)
@@ -202,7 +231,7 @@ namespace AnalysisTransfer
                 // HeatNO를 추출.
                 AnalysisData.HeatNO = AnalysisData.HeatNO.Substring(0, AnalysisData.HeatNO.Length - 1);
 
-                MessageBox.Show("--" + AnalysisData.HeatNO + " -- " + AnalysisData.JLT + "--");
+                //MessageBox.Show("--" + AnalysisData.HeatNO + " -- " + AnalysisData.JLT + "--");
 
 
                 int EleIndex = TransReadData.IndexOf("Fe");
@@ -220,6 +249,66 @@ namespace AnalysisTransfer
                         break;
                     }
                 }
+
+                string SendData="";
+                byte[] SendBytedata = new byte[53];
+                byte[] SendBytedata2;
+                SendBytedata[0] = 0x05;
+                SendData += ""; //Hex : 0x05
+                
+
+                SendData += "A" + AnalysisData.HeatNO.Substring(2);
+                
+                
+                SendData += "B" + "\n\n\n"; //이 부분은 전기로에서 오는 ONTOTAP데이터이며 절대 전송하면 안된다.
+                
+
+                SendData += "C" + "\n\n\n";//이 부분은 전기로에서 오는 TAPTOTAP데이터이며 절대 전송하면 안된다.
+                
+
+                SendData += "D" + "\n\n\n"; //이 부분은 전기로에서 오는 WATT데이터이며 절대 전송하면 안된다.
+                
+
+                SendData += "E" + "0000"; // 이 부분은 전광판의 온도 부분이다. 나중에 C-WRIE 개수가 들어갈 예정이다.
+
+                //SendData += "E" + "\n\n\n\n"; // 이 부분은 전광판의 온도 부분이다. 나중에 C-WRIE 개수가 들어갈 예정이다.
+
+
+                
+                SendData += "F" + Math.Round(AnalysisData.C_Data*100);
+                
+
+                //string bbb = Math.Round(AnalysisData.Si_Data * 100);
+
+                SendData += "G" + Math.Round(AnalysisData.Si_Data * 100);
+
+
+                string aass = Math.Round(AnalysisData.Mn_Data * 100).ToString();
+                if (aass.Length == 2) SendData += "H" +"0"+ aass;
+                else SendData += "H" + aass;
+
+
+                //SendData += "H" + Math.Round(AnalysisData.Mn_Data * 100);
+                SendData += "I" + Math.Round(AnalysisData.P_Data * 1000);
+
+                SendData += "J" + Math.Round(AnalysisData.S_Data * 1000);
+                                
+                SendData += "K" + Math.Round(AnalysisData.Cu_Data * 100);
+                                
+                SendData += "L" + Math.Round(AnalysisData.Cr_Data * 100);
+                                
+                SendData += "M" + Math.Round(AnalysisData.CE_Data * 100); ; // AnalysisData.Ni_Data; 
+                                
+                SendData += "N" + Math.Round(AnalysisData.V_Data * 1000); ;
+                
+                //SendBytedata[50] = SendBytedata2[1];
+                //MessageBox.Show(SendData);
+                //serial.Send(SendBytedata,0,1);
+                
+                //serial.Send(SendBytedata);
+                serial.Send(SendData);
+
+
             }
             else
             {
@@ -240,14 +329,14 @@ namespace AnalysisTransfer
                 case "FE":
                     AnalysisData.FE_Data = Value;
 
-                    MessageBox.Show("FE : " + AnalysisData.FE_Data.ToString());
+                    //MessageBox.Show("FE : " + AnalysisData.FE_Data.ToString());
 
                     break;
 
                 case "C":
                     AnalysisData.C_Data = Value;
 
-                    MessageBox.Show("C : " + AnalysisData.C_Data.ToString());
+                    //MessageBox.Show("C : " + AnalysisData.C_Data.ToString());
 
                     break;
 
@@ -255,155 +344,153 @@ namespace AnalysisTransfer
 
                     AnalysisData.Si_Data = Value;
 
-                    MessageBox.Show("Si : " + AnalysisData.Si_Data.ToString());
+                    //MessageBox.Show("Si : " + AnalysisData.Si_Data.ToString());
 
                     break;
 
                 case "MN":
                     AnalysisData.Mn_Data = Value;
 
-                    MessageBox.Show("MN : " + AnalysisData.Mn_Data.ToString());
+                    //MessageBox.Show("MN : " + AnalysisData.Mn_Data.ToString());
 
                     break;
 
                 case "P":
                     AnalysisData.P_Data = Value;
 
-                    MessageBox.Show("P : " + AnalysisData.P_Data.ToString());
+                    //MessageBox.Show("P : " + AnalysisData.P_Data.ToString());
 
                     break;
 
                 case "S":
                     AnalysisData.S_Data = Value;
 
-                    MessageBox.Show("S : " + AnalysisData.S_Data.ToString());
+                    //MessageBox.Show("S : " + AnalysisData.S_Data.ToString());
 
                     break;
 
                 case "CU":
                     AnalysisData.Cu_Data = Value;
 
-                    MessageBox.Show("CU : " + AnalysisData.Cu_Data.ToString());
+                    //MessageBox.Show("CU : " + AnalysisData.Cu_Data.ToString());
 
                     break;
 
                 case "CR":
                     AnalysisData.Cr_Data = Value;
 
-                    MessageBox.Show("CR : " + AnalysisData.Cr_Data.ToString());
+                    //MessageBox.Show("CR : " + AnalysisData.Cr_Data.ToString());
 
                     break;
 
                 case "NI":
                     AnalysisData.Ni_Data = Value;
 
-                    MessageBox.Show("NI : " + AnalysisData.Ni_Data.ToString());
+                    //MessageBox.Show("NI : " + AnalysisData.Ni_Data.ToString());
 
                     break;
 
                 case "V":
                     AnalysisData.V_Data = Value;
 
-                    MessageBox.Show("V : " + AnalysisData.V_Data.ToString());
+                    //MessageBox.Show("V : " + AnalysisData.V_Data.ToString());
 
                     break;
 
                 case "NB":
                     AnalysisData.Nb_Data = Value;
 
-                    MessageBox.Show("NB : " + AnalysisData.Nb_Data.ToString());
+                    //MessageBox.Show("NB : " + AnalysisData.Nb_Data.ToString());
 
                     break;
 
                 case "MO":
                     AnalysisData.Mo_Data = Value;
 
-                    MessageBox.Show("MO : " + AnalysisData.Mo_Data.ToString());
+                    //MessageBox.Show("MO : " + AnalysisData.Mo_Data.ToString());
 
                     break;
 
                 case "TI":
                     AnalysisData.Ti_Data = Value;
 
-                    MessageBox.Show("TI : " + AnalysisData.Ti_Data.ToString());
+                    //MessageBox.Show("TI : " + AnalysisData.Ti_Data.ToString());
 
                     break;
 
                 case "AL":
                     AnalysisData.Al_Data = Value;
 
-                    MessageBox.Show("AL : " + AnalysisData.Al_Data.ToString());
+                    //MessageBox.Show("AL : " + AnalysisData.Al_Data.ToString());
 
                     break;
 
                 case "SN":
                     AnalysisData.Sn_Data = Value;
 
-                    MessageBox.Show("SN : " + AnalysisData.Sn_Data.ToString());
+                    //MessageBox.Show("SN : " + AnalysisData.Sn_Data.ToString());
 
                     break;
 
                 case "W":
                     AnalysisData.W_Data = Value;
 
-                    MessageBox.Show("W : " + AnalysisData.W_Data.ToString());
+                    //MessageBox.Show("W : " + AnalysisData.W_Data.ToString());
 
                     break;
 
                 case "AS":
                     AnalysisData.As_Data = Value;
 
-                    MessageBox.Show("AS : " + AnalysisData.As_Data.ToString());
+                    //MessageBox.Show("AS : " + AnalysisData.As_Data.ToString());
 
                     break;
 
                 case "SB":
                     AnalysisData.Sb_Data = Value;
 
-                    MessageBox.Show("SB : " + AnalysisData.Sb_Data.ToString());
+                    //MessageBox.Show("SB : " + AnalysisData.Sb_Data.ToString());
 
                     break;
 
                 case "PB":
                     AnalysisData.Pb_Data = Value;
 
-                    MessageBox.Show("PB : " + AnalysisData.Pb_Data.ToString());
+                    //MessageBox.Show("PB : " + AnalysisData.Pb_Data.ToString());
 
                     break;
 
                 case "ZN":
                     AnalysisData.Zn_Data = Value;
 
-                    MessageBox.Show("ZN : " + AnalysisData.Zn_Data.ToString());
+                    //MessageBox.Show("ZN : " + AnalysisData.Zn_Data.ToString());
 
                     break;
 
                 case "N":
                     AnalysisData.N_Data = Value;
 
-                    MessageBox.Show("N : " + AnalysisData.N_Data.ToString());
+                    //MessageBox.Show("N : " + AnalysisData.N_Data.ToString());
 
                     break;
 
                 case "CA":
                     AnalysisData.Ca_Data = Value;
 
-                    MessageBox.Show("Ca : " + AnalysisData.Ca_Data.ToString());
+                    //MessageBox.Show("Ca : " + AnalysisData.Ca_Data.ToString());
 
                     break;
 
                 case "INT":
                     AnalysisData.INT_Data = Value;
 
-                    MessageBox.Show("INT : " + AnalysisData.INT_Data.ToString());
+                    //MessageBox.Show("INT : " + AnalysisData.INT_Data.ToString());
 
                     break;
 
                 case "CE":
                     AnalysisData.CE_Data = Value;
-                    // AnalysisData.Ni_Data = AnalysisData.CE_Data;
-                    MessageBox.Show("CE : " + AnalysisData.CE_Data.ToString());
-                    //MessageBox.Show("ni : " + AnalysisData.Ni_Data.ToString());
+                    //MessageBox.Show("CE : " + AnalysisData.CE_Data.ToString());
                     break;
 
 
@@ -462,6 +549,435 @@ namespace AnalysisTransfer
 
                 SerialINI.Save(INIFilePath);
             }
+        }
+
+        private void DataReceivedHandler(byte[] receiveData)
+        {
+            int ReadIndex = 0;
+            char ReadData;
+            string EleValue=""; ;
+            //Debug.WriteLine(ex.ToString()5);
+            while (ReadIndex < receiveData.Length)
+            {
+                ReadData = (char)receiveData[ReadIndex];
+
+                switch (ReadData.ToString().ToUpper())
+                {
+                    case "A":
+                        if (receiveData.Length > ReadIndex + 4)
+                        {
+                            try
+                            {
+                                ReadIndex++;
+                                ReadData = (char)receiveData[ReadIndex];
+                                EleValue = ((char)receiveData[ReadIndex]).ToString();// + receiveData[ReadIndex + 2] + receiveData[ReadIndex + 3] + receiveData[ReadIndex + 4]);
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+
+                                //정상적인 데이터인지 검사
+                                Int32.Parse(EleValue);
+
+                                this.Invoke(new MethodInvoker(delegate()
+                                {
+                                    transmissionDisplay1.Display_CHNO(EleValue);
+                                }));
+                            } catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.ToString());
+                                break;
+                            }
+                        }
+                        break;
+
+                    case "B":
+                        if (receiveData.Length > ReadIndex + 3)
+                        {
+                            try
+                            {
+                                ReadIndex++;
+                                ReadData = (char)receiveData[ReadIndex];
+                                EleValue = ((char)receiveData[ReadIndex]).ToString();// + receiveData[ReadIndex + 2] + receiveData[ReadIndex + 3] + receiveData[ReadIndex + 4]);
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+
+                                //정상적인 데이터인지 검사
+                                Int32.Parse(EleValue);
+
+                                this.Invoke(new MethodInvoker(delegate ()
+                                {
+                                    transmissionDisplay1.Display_ONTOTAP(EleValue);
+                                }));
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.ToString());
+                                break;
+                            }
+                        }
+                        break;
+                        
+                    case "C":
+                        if (receiveData.Length > ReadIndex + 3)
+                        {
+                            try
+                            {
+                                ReadIndex++;
+                                ReadData = (char)receiveData[ReadIndex];
+                                EleValue = ((char)receiveData[ReadIndex]).ToString();// + receiveData[ReadIndex + 2] + receiveData[ReadIndex + 3] + receiveData[ReadIndex + 4]);
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+
+                                //정상적인 데이터인지 검사
+                                Int32.Parse(EleValue);
+
+                                this.Invoke(new MethodInvoker(delegate ()
+                                {
+                                    transmissionDisplay1.Display_TAPTOTAP(EleValue);
+                                }));
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.ToString());
+                                break;
+                            }
+                        }
+                        break;
+                    case "D": //WATT
+                        if (receiveData.Length > ReadIndex + 3)
+                        {
+                            try
+                            {
+                                ReadIndex++;
+                                ReadData = (char)receiveData[ReadIndex];
+                                EleValue = ((char)receiveData[ReadIndex]).ToString();// + receiveData[ReadIndex + 2] + receiveData[ReadIndex + 3] + receiveData[ReadIndex + 4]);
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+
+                                //정상적인 데이터인지 검사
+                                Int32.Parse(EleValue);
+
+                                this.Invoke(new MethodInvoker(delegate ()
+                                {
+                                    transmissionDisplay1.Display_WATT(EleValue);
+                                }));
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.ToString());
+                                break;
+                            }
+                        }
+                        break;
+                    case "E": //TEMP
+                        if (receiveData.Length > ReadIndex + 4)
+                        {
+                            try
+                            {
+                                ReadIndex++;
+                                ReadData = (char)receiveData[ReadIndex];
+                                EleValue = ((char)receiveData[ReadIndex]).ToString();// + receiveData[ReadIndex + 2] + receiveData[ReadIndex + 3] + receiveData[ReadIndex + 4]);
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+
+                                //정상적인 데이터인지 검사
+                                Int32.Parse(EleValue);
+
+                                this.Invoke(new MethodInvoker(delegate ()
+                                {
+                                    transmissionDisplay1.Display_TEMP(EleValue);
+                                }));
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.ToString());
+                                break;
+                            }
+                        }
+                        break;
+                    case "F": //C
+                        if (receiveData.Length > ReadIndex + 2)
+                        {
+                            try
+                            {
+                                ReadIndex++;
+                                ReadData = (char)receiveData[ReadIndex];
+                                EleValue = ((char)receiveData[ReadIndex]).ToString();// + receiveData[ReadIndex + 2] + receiveData[ReadIndex + 3] + receiveData[ReadIndex + 4]);
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+                                
+                                //정상적인 데이터인지 검사
+                                Int32.Parse(EleValue);
+
+                                this.Invoke(new MethodInvoker(delegate ()
+                                {
+                                    transmissionDisplay1.Display_C(EleValue);
+                                }));
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.ToString());
+                                break;
+                            }
+                        }
+
+                        break;
+                    case "G":
+                        if (receiveData.Length > ReadIndex + 2)
+                        {
+                            try
+                            {
+                                ReadIndex++;
+                                ReadData = (char)receiveData[ReadIndex];
+                                EleValue = ((char)receiveData[ReadIndex]).ToString();// + receiveData[ReadIndex + 2] + receiveData[ReadIndex + 3] + receiveData[ReadIndex + 4]);
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+
+                                //정상적인 데이터인지 검사
+                                Int32.Parse(EleValue);
+
+                                this.Invoke(new MethodInvoker(delegate ()
+                                {
+                                    transmissionDisplay1.Display_SI(EleValue);
+                                }));
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.ToString());
+                                break;
+                            }
+                        }
+
+                        break;
+                    case "H":
+                        if (receiveData.Length > ReadIndex + 3)
+                        {
+                            try
+                            {
+                                ReadIndex++;
+                                ReadData = (char)receiveData[ReadIndex];
+                                EleValue = ((char)receiveData[ReadIndex]).ToString();// + receiveData[ReadIndex + 2] + receiveData[ReadIndex + 3] + receiveData[ReadIndex + 4]);
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+
+                                //정상적인 데이터인지 검사
+                                Int32.Parse(EleValue);
+
+                                this.Invoke(new MethodInvoker(delegate ()
+                                {
+                                    transmissionDisplay1.Display_MN(EleValue);
+                                }));
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.ToString());
+                                break;
+                            }
+                        }
+
+                        break;
+                    case "I":
+                        if (receiveData.Length > ReadIndex + 2)
+                        {
+                            try
+                            {
+                                ReadIndex++;
+                                ReadData = (char)receiveData[ReadIndex];
+                                EleValue = ((char)receiveData[ReadIndex]).ToString();// + receiveData[ReadIndex + 2] + receiveData[ReadIndex + 3] + receiveData[ReadIndex + 4]);
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+
+                                //정상적인 데이터인지 검사
+                                Int32.Parse(EleValue);
+
+                                this.Invoke(new MethodInvoker(delegate ()
+                                {
+                                    transmissionDisplay1.Display_P(EleValue);
+                                }));
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.ToString());
+                                break;
+                            }
+                        }
+
+                        break;
+                    case "J":
+                        if (receiveData.Length > ReadIndex + 2)
+                        {
+                            try
+                            {
+                                ReadIndex++;
+                                ReadData = (char)receiveData[ReadIndex];
+                                EleValue = ((char)receiveData[ReadIndex]).ToString();// + receiveData[ReadIndex + 2] + receiveData[ReadIndex + 3] + receiveData[ReadIndex + 4]);
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+
+                                //정상적인 데이터인지 검사
+                                Int32.Parse(EleValue);
+
+                                this.Invoke(new MethodInvoker(delegate ()
+                                {
+                                    transmissionDisplay1.Display_S(EleValue);
+                                }));
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.ToString());
+                                break;
+                            }
+                        }
+
+                        break;
+                    case "K":
+                        if (receiveData.Length > ReadIndex + 2)
+                        {
+                            try
+                            {
+                                ReadIndex++;
+                                ReadData = (char)receiveData[ReadIndex];
+                                EleValue = ((char)receiveData[ReadIndex]).ToString();// + receiveData[ReadIndex + 2] + receiveData[ReadIndex + 3] + receiveData[ReadIndex + 4]);
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+
+                                //정상적인 데이터인지 검사
+                                Int32.Parse(EleValue);
+
+                                this.Invoke(new MethodInvoker(delegate ()
+                                {
+                                    transmissionDisplay1.Display_CU(EleValue);
+                                }));
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.ToString());
+                                break;
+                            }
+                        }
+
+                        break;
+                    case "L":
+                        if (receiveData.Length > ReadIndex + 2)
+                        {
+                            try
+                            {
+                                ReadIndex++;
+                                ReadData = (char)receiveData[ReadIndex];
+                                EleValue = ((char)receiveData[ReadIndex]).ToString();// + receiveData[ReadIndex + 2] + receiveData[ReadIndex + 3] + receiveData[ReadIndex + 4]);
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+
+                                //정상적인 데이터인지 검사
+                                Int32.Parse(EleValue);
+
+                                this.Invoke(new MethodInvoker(delegate ()
+                                {
+                                    transmissionDisplay1.Display_CR(EleValue);
+                                }));
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.ToString());
+                                break;
+                            }
+                        }
+
+                        break;
+                    case "M":
+                        if (receiveData.Length > ReadIndex + 2)
+                        {
+                            try
+                            {
+                                ReadIndex++;
+                                ReadData = (char)receiveData[ReadIndex];
+                                EleValue = ((char)receiveData[ReadIndex]).ToString();// + receiveData[ReadIndex + 2] + receiveData[ReadIndex + 3] + receiveData[ReadIndex + 4]);
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+
+                                //정상적인 데이터인지 검사
+                                Int32.Parse(EleValue);
+
+                                this.Invoke(new MethodInvoker(delegate ()
+                                {
+                                    transmissionDisplay1.Display_NI(EleValue);
+                                }));
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.ToString());
+                                break;
+                            }
+                        }
+
+                        break;
+                    case "N":
+                        if (receiveData.Length > ReadIndex + 2)
+                        {
+                            try
+                            {
+                                ReadIndex++;
+                                ReadData = (char)receiveData[ReadIndex];
+                                EleValue = ((char)receiveData[ReadIndex]).ToString();// + receiveData[ReadIndex + 2] + receiveData[ReadIndex + 3] + receiveData[ReadIndex + 4]);
+                                ReadIndex++;
+                                EleValue += ((char)receiveData[ReadIndex]).ToString();
+
+                                //정상적인 데이터인지 검사
+                                Int32.Parse(EleValue);
+
+                                this.Invoke(new MethodInvoker(delegate ()
+                                {
+                                    transmissionDisplay1.Display_V(EleValue);
+                                }));
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(ex.ToString());
+                                break;
+                            }
+                        }
+
+                        break;
+                }
+                ReadIndex++;
+            }
+        }
+
+        private void DisconnectedHandler()
+        {
+            Console.WriteLine("serial disconnected");
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Debug.WriteLine("종료");
+            //args.Dispose();
+            m_ServerSocket.Close();
+            serial.CloseComm();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            //A2942B000C099D000E0008F29G13H060I25J29K27L41M51N08
+
+            serial.Send("A0001B\n\n\nC\n\n\nD\n\n\nE0005F29G13H060I25J29K27L41M51N08");
+
+
         }
     }
 }

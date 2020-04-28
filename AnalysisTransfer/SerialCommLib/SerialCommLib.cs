@@ -174,7 +174,7 @@ namespace SerialCommLib
                 }
                 catch (TimeoutException ex)
                 {
-                    Debug.WriteLine(ex.ToString());
+                    Debug.WriteLine("2 : "+ex.ToString());
                 }
             }
 
@@ -195,13 +195,28 @@ namespace SerialCommLib
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex.ToString());
+                //Debug.WriteLine("1 : "+ex.ToString());
             }
         }
 
         private void serialPort_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
         {
-            Debug.WriteLine(e.ToString());
+            //Debug.WriteLine("3 : "+e.ToString());
+            SerialError serialError = e.EventType;
+            string errorMessage = string.Empty;
+
+            switch (serialError)
+            {
+                case SerialError.Frame: errorMessage = "HardWare Framing Error"; break;
+                case SerialError.Overrun: errorMessage = "Charaters Buffer Over Run"; break;
+
+                case SerialError.RXOver: errorMessage = "Input Buffer OverFlow"; break;
+
+                case SerialError.RXParity: errorMessage = "Founded Parity Error"; break;
+                case SerialError.TXFull: errorMessage = "Write Buffer was Fulled"; break;
+                default: break;
+            }
+            Debug.WriteLine("3 : " + errorMessage);
         }
 
         private void StartCheckSerialOpenThread()
