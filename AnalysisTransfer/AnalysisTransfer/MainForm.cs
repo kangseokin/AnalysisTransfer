@@ -251,15 +251,16 @@ namespace AnalysisTransfer
                 }
 
                 string SendData="";
-                byte[] SendBytedata = new byte[53];
-                byte[] SendBytedata2;
-                SendBytedata[0] = 0x05;
+                string SendData2;
+
+                //SendData = String.Format("{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}         A is {0} and B is {1}, {0} - {1} is {2}", A, B, A - B);
+
                 SendData += ""; //Hex : 0x05
                 
 
-                SendData += "A" + AnalysisData.HeatNO.Substring(2);
-                
-                
+                SendData += "A" + AnalysisData.HeatNO.Substring(2,4);
+                //MessageBox.Show(AnalysisData.HeatNO.Substring(2, 4));
+
                 SendData += "B" + "\n\n\n"; //이 부분은 전기로에서 오는 ONTOTAP데이터이며 절대 전송하면 안된다.
                 
 
@@ -271,12 +272,28 @@ namespace AnalysisTransfer
 
                 SendData += "E" + "0000"; // 이 부분은 전광판의 온도 부분이다. 나중에 C-WRIE 개수가 들어갈 예정이다.
 
-                //SendData += "E" + "\n\n\n\n"; // 이 부분은 전광판의 온도 부분이다. 나중에 C-WRIE 개수가 들어갈 예정이다.
-
-
                 
                 SendData += "F" + Math.Round(AnalysisData.C_Data*100);
-                
+
+
+
+
+                string MnData = Math.Round(AnalysisData.Mn_Data * 100).ToString();
+                if (MnData.Length == 2) SendData += "H" + "0" + MnData;
+                else SendData += "H" + MnData;
+                SendData2 = String.Format("A:{0}B\n\n\nC\n\n\nD\n\n\nE0000F{1:00}G{2:00}H{3:000}I{4:00}J{5:00}K{6:00}L{7:00}M{8:00}N{9:00} ",
+                                                                                                    AnalysisData.HeatNO.Substring(2, 4),
+                                                                                                    Math.Round(AnalysisData.C_Data*100),
+                                                                                                    Math.Round(AnalysisData.Si_Data * 100),
+                                                                                                    MnData,
+                                                                                                    Math.Round(AnalysisData.P_Data * 1000),
+                                                                                                    Math.Round(AnalysisData.S_Data * 1000),
+                                                                                                    Math.Round(AnalysisData.Cu_Data * 100),
+                                                                                                    Math.Round(AnalysisData.Cr_Data * 100),
+                                                                                                    Math.Round(AnalysisData.Ni_Data * 100),
+                                                                                                    Math.Round(AnalysisData.V_Data * 1000));
+                MessageBox.Show(SendData2);
+
 
                 //string bbb = Math.Round(AnalysisData.Si_Data * 100);
 
@@ -301,12 +318,8 @@ namespace AnalysisTransfer
                                 
                 SendData += "N" + Math.Round(AnalysisData.V_Data * 1000); ;
                 
-                //SendBytedata[50] = SendBytedata2[1];
-                //MessageBox.Show(SendData);
-                //serial.Send(SendBytedata,0,1);
                 
-                //serial.Send(SendBytedata);
-                serial.Send(SendData);
+                //serial.Send(SendData);
 
 
             }

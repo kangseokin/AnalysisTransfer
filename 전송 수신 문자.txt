@@ -4,4 +4,4 @@
 전송문자  :  A2942B000C099D000E0008F29G13H060I25J29K27L41M51N08
 
              A2942      B000        C099        D000   E0008    F29  G13   H060   I25   J29   K27   L41   M51   N08
-시작문자  CH-NO   OnTOTap   TapTOTap    Wett    Temp     C     Si      Mn      P     S      Cu    Cr     Ni      V 
+시작문자  CH-NO   OnTOTap   TapTOTap    Wett    Temp     C    Si     Mn      P     S      Cu    Cr     Ni      V 
