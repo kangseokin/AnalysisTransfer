@@ -250,38 +250,12 @@ namespace AnalysisTransfer
                     }
                 }
 
-                string SendData="";
-                string SendData2;
-
-                //SendData = String.Format("{0}{1}{2}{3}{4}{5}{6}{7}{8}{9}{10}{11}{12}{13}{14}         A is {0} and B is {1}, {0} - {1} is {2}", A, B, A - B);
-
-                SendData += ""; //Hex : 0x05
                 
-
-                SendData += "A" + AnalysisData.HeatNO.Substring(2,4);
-                //MessageBox.Show(AnalysisData.HeatNO.Substring(2, 4));
-
-                SendData += "B" + "\n\n\n"; //이 부분은 전기로에서 오는 ONTOTAP데이터이며 절대 전송하면 안된다.
-                
-
-                SendData += "C" + "\n\n\n";//이 부분은 전기로에서 오는 TAPTOTAP데이터이며 절대 전송하면 안된다.
-                
-
-                SendData += "D" + "\n\n\n"; //이 부분은 전기로에서 오는 WATT데이터이며 절대 전송하면 안된다.
-                
-
-                SendData += "E" + "0000"; // 이 부분은 전광판의 온도 부분이다. 나중에 C-WRIE 개수가 들어갈 예정이다.
-
-                
-                SendData += "F" + Math.Round(AnalysisData.C_Data*100);
-
-
-
+                string SendData;
 
                 string MnData = Math.Round(AnalysisData.Mn_Data * 100).ToString();
-                if (MnData.Length == 2) SendData += "H" + "0" + MnData;
-                else SendData += "H" + MnData;
-                SendData2 = String.Format("A:{0}B\n\n\nC\n\n\nD\n\n\nE0000F{1:00}G{2:00}H{3:000}I{4:00}J{5:00}K{6:00}L{7:00}M{8:00}N{9:00} ",
+                
+                SendData = String.Format("A:{0}B\n\n\nC\n\n\nD\n\n\nE0000F{1:00}G{2:00}H{3:000}I{4:00}J{5:00}K{6:00}L{7:00}M{8:00}N{9:00}",
                                                                                                     AnalysisData.HeatNO.Substring(2, 4),
                                                                                                     Math.Round(AnalysisData.C_Data*100),
                                                                                                     Math.Round(AnalysisData.Si_Data * 100),
@@ -290,38 +264,11 @@ namespace AnalysisTransfer
                                                                                                     Math.Round(AnalysisData.S_Data * 1000),
                                                                                                     Math.Round(AnalysisData.Cu_Data * 100),
                                                                                                     Math.Round(AnalysisData.Cr_Data * 100),
-                                                                                                    Math.Round(AnalysisData.Ni_Data * 100),
+                                                                                                    Math.Round(AnalysisData.CE_Data * 100),
                                                                                                     Math.Round(AnalysisData.V_Data * 1000));
-                MessageBox.Show(SendData2);
-
-
-                //string bbb = Math.Round(AnalysisData.Si_Data * 100);
-
-                SendData += "G" + Math.Round(AnalysisData.Si_Data * 100);
-
-
-                string aass = Math.Round(AnalysisData.Mn_Data * 100).ToString();
-                if (aass.Length == 2) SendData += "H" +"0"+ aass;
-                else SendData += "H" + aass;
-
-
-                //SendData += "H" + Math.Round(AnalysisData.Mn_Data * 100);
-                SendData += "I" + Math.Round(AnalysisData.P_Data * 1000);
-
-                SendData += "J" + Math.Round(AnalysisData.S_Data * 1000);
-                                
-                SendData += "K" + Math.Round(AnalysisData.Cu_Data * 100);
-                                
-                SendData += "L" + Math.Round(AnalysisData.Cr_Data * 100);
-                                
-                SendData += "M" + Math.Round(AnalysisData.CE_Data * 100); ; // AnalysisData.Ni_Data; 
-                                
-                SendData += "N" + Math.Round(AnalysisData.V_Data * 1000); ;
+                //MessageBox.Show(SendData);
                 
-                
-                //serial.Send(SendData);
-
-
+                serial.Send(SendData);
             }
             else
             {
