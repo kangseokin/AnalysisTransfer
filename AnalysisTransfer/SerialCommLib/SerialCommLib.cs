@@ -174,7 +174,7 @@ namespace SerialCommLib
                 }
                 catch (TimeoutException ex)
                 {
-                    Debug.WriteLine("2 : "+ex.ToString());
+                    //Debug.WriteLine("2 : "+ex.ToString());
                 }
             }
 
@@ -191,7 +191,7 @@ namespace SerialCommLib
                 if (DataReceivedHandler != null)
                     DataReceivedHandler(bytesBuffer);
 
-                Debug.WriteLine("received(" + strBuffer.Length + ") : " + strBuffer);
+                //Debug.WriteLine("received(" + strBuffer.Length + ") : " + strBuffer);
             }
             catch (Exception ex)
             {
@@ -216,7 +216,7 @@ namespace SerialCommLib
                 case SerialError.TXFull: errorMessage = "Write Buffer was Fulled"; break;
                 default: break;
             }
-            Debug.WriteLine("3 : " + errorMessage);
+            //Debug.WriteLine("3 : " + errorMessage);
         }
 
         private void StartCheckSerialOpenThread()

@@ -240,7 +240,7 @@ namespace AnalysisTransfer
                 for (int ii = 0 ; ii < 원소의총갯수; ii++)
                 {
                     
-                    항목별로데이터저장(TransReadData.Substring(EleIndex+ sumii, 5).Trim(), Convert.ToDouble(TransReadData.Substring(EleIndex + sumii + 5, 7).Trim()));
+                    항목별로데이터저장(TransReadData.Substring(EleIndex+ sumii, 5).Trim(), Convert.ToDouble(TransReadData.Substring(EleIndex + sumii + 5, 6).Trim()));
 
                     sumii += 12;
 
@@ -252,9 +252,21 @@ namespace AnalysisTransfer
 
                 
                 string SendData;
-
+                //
                 string MnData = Math.Round(AnalysisData.Mn_Data * 100).ToString();
-                
+                switch(MnData.Length)
+                {
+                    case 0:
+                        MnData = "000";
+                        break;
+                    case 1:
+                        MnData = "00" + MnData;
+                        break;
+                    case 2:
+                        MnData = "0" + MnData;
+                        break;
+                }
+
                 SendData = String.Format("A:{0}B\n\n\nC\n\n\nD\n\n\nE0000F{1:00}G{2:00}H{3:000}I{4:00}J{5:00}K{6:00}L{7:00}M{8:00}N{9:00}",
                                                                                                     AnalysisData.HeatNO.Substring(2, 4),
                                                                                                     Math.Round(AnalysisData.C_Data*100),
@@ -268,7 +280,9 @@ namespace AnalysisTransfer
                                                                                                     Math.Round(AnalysisData.V_Data * 1000));
                 //MessageBox.Show(SendData);
                 
-                serial.Send(SendData);
+                // 바이트로 바꾸지 않으면 \n(null)에서 출력 중지되어 재대로 전송이 되질않음...
+                serial.Send(Encoding.UTF8.GetBytes(SendData));
+                Debug.WriteLine(SendData);
             }
             else
             {
@@ -547,7 +561,7 @@ namespace AnalysisTransfer
                                 }));
                             } catch (Exception ex)
                             {
-                                Debug.WriteLine(ex.ToString());
+                                //Debug.WriteLine(ex.ToString());
                                 break;
                             }
                         }
@@ -576,7 +590,7 @@ namespace AnalysisTransfer
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine(ex.ToString());
+                                //Debug.WriteLine(ex.ToString());
                                 break;
                             }
                         }
@@ -605,7 +619,7 @@ namespace AnalysisTransfer
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine(ex.ToString());
+                                //Debug.WriteLine(ex.ToString());
                                 break;
                             }
                         }
@@ -633,7 +647,7 @@ namespace AnalysisTransfer
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine(ex.ToString());
+                                //Debug.WriteLine(ex.ToString());
                                 break;
                             }
                         }
@@ -663,7 +677,7 @@ namespace AnalysisTransfer
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine(ex.ToString());
+                                //Debug.WriteLine(ex.ToString());
                                 break;
                             }
                         }
@@ -689,7 +703,7 @@ namespace AnalysisTransfer
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine(ex.ToString());
+                                //Debug.WriteLine(ex.ToString());
                                 break;
                             }
                         }
@@ -716,7 +730,7 @@ namespace AnalysisTransfer
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine(ex.ToString());
+                                //Debug.WriteLine(ex.ToString());
                                 break;
                             }
                         }
@@ -745,7 +759,7 @@ namespace AnalysisTransfer
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine(ex.ToString());
+                                //Debug.WriteLine(ex.ToString());
                                 break;
                             }
                         }
@@ -772,7 +786,7 @@ namespace AnalysisTransfer
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine(ex.ToString());
+                                //Debug.WriteLine(ex.ToString());
                                 break;
                             }
                         }
@@ -799,7 +813,7 @@ namespace AnalysisTransfer
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine(ex.ToString());
+                                //Debug.WriteLine(ex.ToString());
                                 break;
                             }
                         }
@@ -826,7 +840,7 @@ namespace AnalysisTransfer
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine(ex.ToString());
+                                //Debug.WriteLine(ex.ToString());
                                 break;
                             }
                         }
@@ -853,7 +867,7 @@ namespace AnalysisTransfer
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine(ex.ToString());
+                                //Debug.WriteLine(ex.ToString());
                                 break;
                             }
                         }
@@ -880,7 +894,7 @@ namespace AnalysisTransfer
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine(ex.ToString());
+                                //Debug.WriteLine(ex.ToString());
                                 break;
                             }
                         }
@@ -907,7 +921,7 @@ namespace AnalysisTransfer
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine(ex.ToString());
+                                //Debug.WriteLine(ex.ToString());
                                 break;
                             }
                         }
