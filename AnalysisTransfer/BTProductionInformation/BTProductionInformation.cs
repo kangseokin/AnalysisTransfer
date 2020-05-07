@@ -8,10 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SqlClient;
+using System.Diagnostics;
 
 namespace BTProductionInformation
 {
-    public partial class BTProductionInformation: UserControl
+    public partial class BTProductionInformation : UserControl
     {
         // Server 정보.
         const string Server_IP = "HK";
@@ -49,7 +50,7 @@ namespace BTProductionInformation
 
         private void BTProductionInformation_Load(object sender, EventArgs e)
         {
-            Open();
+            //Open();
 
             timer1.Start();
         }
@@ -116,132 +117,135 @@ namespace BTProductionInformation
         // 데이터베이스 닫기
         public void Close()
         {
-            ERPDataBase_conn.Close();
-            QCMANAGER_Data_conn.Close();
+            //ERPDataBase_conn.Close();
+            //QCMANAGER_Data_conn.Close();
         }
 
         // ERP 연주 데이터.
-        public int ERPDataBase_GetYEONJUCount(out string YEONJU_LotNo, out int YEONJU_Count)
+        public void ERPDataBase_GetYEONJUCount(out string YEONJU_LotNo, out int YEONJU_Count)
         {
             YEONJU_LotNo = "";
 
             YEONJU_Count = 0;
 
-            if (ERPDataBase_conn != null)
+            try
             {
                 string commandString = "select LOT_NO,WKRSLT_COUNT from V_MES_WKRSLT_CNT where PMEQP_NO = 'A100-10'";
 
+                ERPDataBase_conn = new SqlConnection(ConnectionStringERP10GG0);
+
                 SqlCommand myCommand = new SqlCommand(commandString, ERPDataBase_conn);
 
-                SqlDataReader myReader = myCommand.ExecuteReader();
+                ERPDataBase_conn.Open();
 
-                if (myReader.HasRows)
+                using (SqlDataReader myReader = myCommand.ExecuteReader())
                 {
-                    myReader.Read();
+                    if (myReader.HasRows)
+                    {
+                        myReader.Read();
 
-                    YEONJU_LotNo = myReader.GetString(0);
+                        YEONJU_LotNo = myReader.GetString(0);
 
-                    YEONJU_Count = (int)myReader.GetDecimal(1);
+                        YEONJU_Count = (int)myReader.GetDecimal(1);
+                    }
                 }
 
-                myReader.Close();
             }
-            else
+            catch (Exception ex)
             {
-                return -1;   //db에 연결이 안되어있다. 다시 연결하는 부분을 넣어주어야 한다.
+                Debug.WriteLine(ex);
             }
-
-            return 0;
+            finally
+            {
+                ERPDataBase_conn.Close();
+            }
         }
 
         // HDR 카운트.
-        public int ERPDataBase_GetHDRCount(out string HDR_LotNo, out int HDR_Count)
+        public void ERPDataBase_GetHDRCount(out string HDR_LotNo, out int HDR_Count)
         {
             HDR_LotNo = "";
 
             HDR_Count = 0;
-
-            if (ERPDataBase_conn != null)
+            try
             {
                 string commandString = "select LOT_NO,WKRSLT_COUNT from V_MES_WKRSLT_CNT where PMEQP_NO = 'B100-10'";
 
+                ERPDataBase_conn = new SqlConnection(ConnectionStringERP10GG0);
+
                 SqlCommand myCommand = new SqlCommand(commandString, ERPDataBase_conn);
 
-                SqlDataReader myReader = myCommand.ExecuteReader();
+                ERPDataBase_conn.Open();
 
-                if (myReader.HasRows)
+                using (SqlDataReader myReader = myCommand.ExecuteReader())
                 {
-                    myReader.Read();
+                    if (myReader.HasRows)
+                    {
+                        myReader.Read();
 
-                    HDR_LotNo = myReader.GetString(0);
+                        YEONJU_LotNo = myReader.GetString(0);
 
-                    HDR_Count = (int)myReader.GetDecimal(1);
+                        YEONJU_Count = (int)myReader.GetDecimal(1);
+                    }
                 }
-
-                myReader.Close();
             }
-            else
+            catch (Exception ex)
             {
-                return -1;
+                Debug.WriteLine(ex);
             }
-
-            return 0;
+            finally
+            {
+                ERPDataBase_conn.Close();
+            }
         }
 
+
         // QCMANAGER의 데이터중에 호칭,길이, 강종을 얻어오는 부분.
-        public int QCMANAGERData_GetLotData(string YEONJULotNo, out string 강종, out string 호칭, out string 길이)
+        public void QCMANAGERData_GetLotData(string YEONJULotNo, out string 강종, out string 호칭, out string 길이)
         {
             강종 = "";
             호칭 = "";
             길이 = "";
-
-            if (QCMANAGER_Data_conn != null)
+            try
             {
                 if (YEONJULotNo.Length > 0)
                 {
                     string commandString = "select HCNM,YKWGI,GJGB from dbo.TQCQ1100 where (HeatNo = '" + YEONJULotNo + "') and  (GSGB='T');"; // 여기에 T/D를 구분하는 쿼리를 넣어야 한다.
 
+                    QCMANAGER_Data_conn = new SqlConnection(ConnectionStringQCMANAGER_Data);
+
                     SqlCommand myCommand = new SqlCommand(commandString, QCMANAGER_Data_conn);
 
-                    SqlDataReader myReader = myCommand.ExecuteReader();
+                    QCMANAGER_Data_conn.Open();
 
-                    if (myReader.HasRows)
+                    using (SqlDataReader myReader = myCommand.ExecuteReader())
                     {
-                        if (myReader.Read())
+                        if (myReader.HasRows)
                         {
-                            호칭 = myReader.GetString(0);
+                            if (myReader.Read())
+                            {
+                                호칭 = myReader.GetString(0);
 
-                            길이 = myReader.GetDecimal(1).ToString();
+                                길이 = myReader.GetDecimal(1).ToString();
 
-                            강종 = myReader.GetString(2);
+                                강종 = myReader.GetString(2);
 
-                            myReader.Close();
-                        }
-                        else
-                        {
-                            myReader.Close();
-
-                            return 2;   // 데이터를 얻지 못했음.(HeatNo에 해당하는 데이터가 없음.분석실에서 미리 데이터를 입력하지 않은 상태)
+                                myReader.Close();
+                            }
                         }
                     }
 
-                    myReader.Close();
                 }
-                else
-                {
-                    //myReader.Close();
-                    return 1;   // 검색할 HeatNo의 데이터가 없다.
-                }
-
-                //myReader.Close();
-
             }
-            else
+            catch (Exception ex)
             {
-                return -1; //연결이 되지 앟은 상태이다....다시 연결하는 코드를 나중에 넣어 주어야 한다.
+                Debug.WriteLine(ex);
+            }
+            finally
+            {
+                ERPDataBase_conn.Close();
             }
 
-            return 0;
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -272,7 +276,7 @@ namespace BTProductionInformation
 
             // 카운트 표시
             button1.Text = YEONJU_Count.ToString();
-            
+
             button2.Text = HDR_Count.ToString();
 
             //MessageBox.Show(YEONJU_LotNo);
@@ -307,7 +311,7 @@ namespace BTProductionInformation
             {
                 groupBox2.Text = "연주 절단 카운트(" + YEONJU_LotNo + ")";
 
-                if(HDR_LotNo=="") groupBox3.Text = "압연 HDR 장입 카운트";
+                if (HDR_LotNo == "") groupBox3.Text = "압연 HDR 장입 카운트";
                 else groupBox3.Text = "압연 HDR 장입 카운트(" + HDR_LotNo + ")";
 
                 //아래 코드는 회사에서 확인을 해서 다시 작성...
@@ -417,7 +421,7 @@ namespace BTProductionInformation
             */
         }
 
-        
+
     }
 }
 

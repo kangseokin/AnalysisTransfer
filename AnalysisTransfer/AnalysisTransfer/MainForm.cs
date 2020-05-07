@@ -253,6 +253,7 @@ namespace AnalysisTransfer
                 
                 string SendData;
                 //
+                
                 string MnData = Math.Round(AnalysisData.Mn_Data * 100).ToString();
                 switch(MnData.Length)
                 {
@@ -267,22 +268,47 @@ namespace AnalysisTransfer
                         break;
                 }
 
-                SendData = String.Format("A:{0}B\n\n\nC\n\n\nD\n\n\nE0000F{1:00}G{2:00}H{3:000}I{4:00}J{5:00}K{6:00}L{7:00}M{8:00}N{9:00}",
+                //int MnData = (int)Math.Round(AnalysisData.Mn_Data * 100);
+                /*
+                SendData = String.Format("A:{0}E0000F{1:00}G{2:00}H{3}I{4:00}J{5:00}K{6:00}L{7:00}M{8:00}N{9:00}",
                                                                                                     AnalysisData.HeatNO.Substring(2, 4),
-                                                                                                    Math.Round(AnalysisData.C_Data*100),
+                                                                                                    (int)Math.Round(AnalysisData.C_Data * 100),
                                                                                                     Math.Round(AnalysisData.Si_Data * 100),
                                                                                                     MnData,
-                                                                                                    Math.Round(AnalysisData.P_Data * 1000),
-                                                                                                    Math.Round(AnalysisData.S_Data * 1000),
-                                                                                                    Math.Round(AnalysisData.Cu_Data * 100),
-                                                                                                    Math.Round(AnalysisData.Cr_Data * 100),
-                                                                                                    Math.Round(AnalysisData.CE_Data * 100),
-                                                                                                    Math.Round(AnalysisData.V_Data * 1000));
-                //MessageBox.Show(SendData);
+                                                                                                    (int)Math.Round(AnalysisData.P_Data * 1000),
+                                                                                                    (int)Math.Round(AnalysisData.S_Data * 1000),
+                                                                                                    (int)Math.Round(AnalysisData.Cu_Data * 100),
+                                                                                                    (int)Math.Round(AnalysisData.Cr_Data * 100),
+                                                                                                    (int)Math.Round(AnalysisData.CE_Data * 100),
+                                                                                                    (int)Math.Round(AnalysisData.V_Data * 1000));
+                                                                                                    
+                */
                 
+                SendData = String.Format("A{0}B\0\n\nC\n\n\nD\n\n\nE0000F{1:00}G{2:00}H{3}I{4:00}J{5:00}K{6:00}L{7:00}M{8:00}N{9:00}",
+                                                                                                    AnalysisData.HeatNO.Substring(2, 4),
+                                                                                                    (int)Math.Round(AnalysisData.C_Data * 100),
+                                                                                                    Math.Round(AnalysisData.Si_Data * 100),
+                                                                                                    MnData,
+                                                                                                    (int)Math.Round(AnalysisData.P_Data * 1000),
+                                                                                                    (int)Math.Round(AnalysisData.S_Data * 1000),
+                                                                                                    (int)Math.Round(AnalysisData.Cu_Data * 100),
+                                                                                                    (int)Math.Round(AnalysisData.Cr_Data * 100),
+                                                                                                    (int)Math.Round(AnalysisData.CE_Data * 100),
+                                                                                                    (int)Math.Round(AnalysisData.V_Data * 1000));
+    
+                //MessageBox.Show("SendData");
+
                 // 바이트로 바꾸지 않으면 \n(null)에서 출력 중지되어 재대로 전송이 되질않음...
-                serial.Send(Encoding.UTF8.GetBytes(SendData));
-                Debug.WriteLine(SendData);
+                //serial.Send(SendData);
+                byte[] aassdd = Encoding.UTF8.GetBytes(SendData);
+
+
+                serial.Send(SendData);
+
+                //serial.Send(Encoding.UTF8.GetBytes(SendData), 0, (Encoding.UTF8.GetBytes(SendData)).Length);
+
+                //serial.Send(Encoding.UTF8.GetBytes("A:3250B\n\n\nC\n\n\nD\n\n\nE0000F28G22H069I26J26K24L46M53N13"));
+                //Debug.WriteLine(SendData);
             }
             else
             {
@@ -529,7 +555,8 @@ namespace AnalysisTransfer
         {
             int ReadIndex = 0;
             char ReadData;
-            string EleValue=""; ;
+            string EleValue="";
+            int tryint;
             //Debug.WriteLine(ex.ToString()5);
             while (ReadIndex < receiveData.Length)
             {
@@ -553,12 +580,14 @@ namespace AnalysisTransfer
                                 EleValue += ((char)receiveData[ReadIndex]).ToString();
 
                                 //정상적인 데이터인지 검사
-                                Int32.Parse(EleValue);
-
-                                this.Invoke(new MethodInvoker(delegate()
+                                if (Int32.TryParse(EleValue, out tryint))
                                 {
-                                    transmissionDisplay1.Display_CHNO(EleValue);
-                                }));
+
+                                    this.Invoke(new MethodInvoker(delegate ()
+                                    {
+                                        transmissionDisplay1.Display_CHNO(EleValue);
+                                    }));
+                                }
                             } catch (Exception ex)
                             {
                                 //Debug.WriteLine(ex.ToString());
@@ -581,14 +610,17 @@ namespace AnalysisTransfer
                                 EleValue += ((char)receiveData[ReadIndex]).ToString();
 
                                 //정상적인 데이터인지 검사
-                                Int32.Parse(EleValue);
-
-                                this.Invoke(new MethodInvoker(delegate ()
+                                if (Int32.TryParse(EleValue, out tryint))
                                 {
-                                    transmissionDisplay1.Display_ONTOTAP(EleValue);
-                                }));
-                            }
-                            catch (Exception ex)
+
+                                    this.Invoke(new MethodInvoker(delegate ()
+                                    {
+                                        transmissionDisplay1.Display_ONTOTAP(EleValue);
+                                    }));
+
+                                }
+                                
+                            } catch (Exception ex)
                             {
                                 //Debug.WriteLine(ex.ToString());
                                 break;
@@ -610,12 +642,14 @@ namespace AnalysisTransfer
                                 EleValue += ((char)receiveData[ReadIndex]).ToString();
 
                                 //정상적인 데이터인지 검사
-                                Int32.Parse(EleValue);
-
-                                this.Invoke(new MethodInvoker(delegate ()
+                                if (Int32.TryParse(EleValue, out tryint))
                                 {
-                                    transmissionDisplay1.Display_TAPTOTAP(EleValue);
-                                }));
+
+                                    this.Invoke(new MethodInvoker(delegate ()
+                                    {
+                                        transmissionDisplay1.Display_TAPTOTAP(EleValue);
+                                    }));
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -638,12 +672,14 @@ namespace AnalysisTransfer
                                 EleValue += ((char)receiveData[ReadIndex]).ToString();
 
                                 //정상적인 데이터인지 검사
-                                Int32.Parse(EleValue);
-
-                                this.Invoke(new MethodInvoker(delegate ()
+                                if (Int32.TryParse(EleValue, out tryint))
                                 {
-                                    transmissionDisplay1.Display_WATT(EleValue);
-                                }));
+
+                                    this.Invoke(new MethodInvoker(delegate ()
+                                    {
+                                        transmissionDisplay1.Display_WATT(EleValue);
+                                    }));
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -668,12 +704,14 @@ namespace AnalysisTransfer
                                 EleValue += ((char)receiveData[ReadIndex]).ToString();
 
                                 //정상적인 데이터인지 검사
-                                Int32.Parse(EleValue);
-
-                                this.Invoke(new MethodInvoker(delegate ()
+                                if (Int32.TryParse(EleValue, out tryint))
                                 {
-                                    transmissionDisplay1.Display_TEMP(EleValue);
-                                }));
+
+                                    this.Invoke(new MethodInvoker(delegate ()
+                                    {
+                                        transmissionDisplay1.Display_TEMP(EleValue);
+                                    }));
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -692,14 +730,16 @@ namespace AnalysisTransfer
                                 EleValue = ((char)receiveData[ReadIndex]).ToString();// + receiveData[ReadIndex + 2] + receiveData[ReadIndex + 3] + receiveData[ReadIndex + 4]);
                                 ReadIndex++;
                                 EleValue += ((char)receiveData[ReadIndex]).ToString();
-                                
-                                //정상적인 데이터인지 검사
-                                Int32.Parse(EleValue);
 
-                                this.Invoke(new MethodInvoker(delegate ()
+                                //정상적인 데이터인지 검사
+                                if (Int32.TryParse(EleValue, out tryint))
+                                {
+
+                                    this.Invoke(new MethodInvoker(delegate ()
                                 {
                                     transmissionDisplay1.Display_C(EleValue);
                                 }));
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -721,12 +761,14 @@ namespace AnalysisTransfer
                                 EleValue += ((char)receiveData[ReadIndex]).ToString();
 
                                 //정상적인 데이터인지 검사
-                                Int32.Parse(EleValue);
+                                if (Int32.TryParse(EleValue, out tryint))
+                                {
 
-                                this.Invoke(new MethodInvoker(delegate ()
+                                    this.Invoke(new MethodInvoker(delegate ()
                                 {
                                     transmissionDisplay1.Display_SI(EleValue);
                                 }));
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -750,12 +792,14 @@ namespace AnalysisTransfer
                                 EleValue += ((char)receiveData[ReadIndex]).ToString();
 
                                 //정상적인 데이터인지 검사
-                                Int32.Parse(EleValue);
+                                if (Int32.TryParse(EleValue, out tryint))
+                                {
 
-                                this.Invoke(new MethodInvoker(delegate ()
+                                    this.Invoke(new MethodInvoker(delegate ()
                                 {
                                     transmissionDisplay1.Display_MN(EleValue);
                                 }));
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -777,12 +821,14 @@ namespace AnalysisTransfer
                                 EleValue += ((char)receiveData[ReadIndex]).ToString();
 
                                 //정상적인 데이터인지 검사
-                                Int32.Parse(EleValue);
+                                if (Int32.TryParse(EleValue, out tryint))
+                                {
 
-                                this.Invoke(new MethodInvoker(delegate ()
+                                    this.Invoke(new MethodInvoker(delegate ()
                                 {
                                     transmissionDisplay1.Display_P(EleValue);
                                 }));
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -804,12 +850,14 @@ namespace AnalysisTransfer
                                 EleValue += ((char)receiveData[ReadIndex]).ToString();
 
                                 //정상적인 데이터인지 검사
-                                Int32.Parse(EleValue);
+                                if (Int32.TryParse(EleValue, out tryint))
+                                {
 
-                                this.Invoke(new MethodInvoker(delegate ()
+                                    this.Invoke(new MethodInvoker(delegate ()
                                 {
                                     transmissionDisplay1.Display_S(EleValue);
                                 }));
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -831,12 +879,14 @@ namespace AnalysisTransfer
                                 EleValue += ((char)receiveData[ReadIndex]).ToString();
 
                                 //정상적인 데이터인지 검사
-                                Int32.Parse(EleValue);
+                                if (Int32.TryParse(EleValue, out tryint))
+                                {
 
-                                this.Invoke(new MethodInvoker(delegate ()
+                                    this.Invoke(new MethodInvoker(delegate ()
                                 {
                                     transmissionDisplay1.Display_CU(EleValue);
                                 }));
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -858,12 +908,14 @@ namespace AnalysisTransfer
                                 EleValue += ((char)receiveData[ReadIndex]).ToString();
 
                                 //정상적인 데이터인지 검사
-                                Int32.Parse(EleValue);
+                                if (Int32.TryParse(EleValue, out tryint))
+                                {
 
-                                this.Invoke(new MethodInvoker(delegate ()
+                                    this.Invoke(new MethodInvoker(delegate ()
                                 {
                                     transmissionDisplay1.Display_CR(EleValue);
                                 }));
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -885,12 +937,14 @@ namespace AnalysisTransfer
                                 EleValue += ((char)receiveData[ReadIndex]).ToString();
 
                                 //정상적인 데이터인지 검사
-                                Int32.Parse(EleValue);
+                                if (Int32.TryParse(EleValue, out tryint))
+                                {
 
-                                this.Invoke(new MethodInvoker(delegate ()
+                                    this.Invoke(new MethodInvoker(delegate ()
                                 {
                                     transmissionDisplay1.Display_NI(EleValue);
                                 }));
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -912,12 +966,14 @@ namespace AnalysisTransfer
                                 EleValue += ((char)receiveData[ReadIndex]).ToString();
 
                                 //정상적인 데이터인지 검사
-                                Int32.Parse(EleValue);
+                                if (Int32.TryParse(EleValue, out tryint))
+                                {
 
-                                this.Invoke(new MethodInvoker(delegate ()
+                                    this.Invoke(new MethodInvoker(delegate ()
                                 {
                                     transmissionDisplay1.Display_V(EleValue);
                                 }));
+                                }
                             }
                             catch (Exception ex)
                             {
@@ -952,6 +1008,11 @@ namespace AnalysisTransfer
             serial.Send("A0001B\n\n\nC\n\n\nD\n\n\nE0005F29G13H060I25J29K27L41M51N08");
 
 
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            serial.Send("A0001B\n\n\nC\n\n\nD\n\n\nE0005F29G13H060I25J29K27L41M51N08");
         }
     }
 }

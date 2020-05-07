@@ -108,10 +108,12 @@ namespace SerialCommLib
 
         public bool Send(string sendData)
         {
+            Debug.WriteLine("Send(string sendData) 시작");
             try
             {
                 if (serialPort != null && serialPort.IsOpen)
                 {
+                    Debug.WriteLine("Send(string sendData)");
                     serialPort.Write(sendData);
                     return true;
                 }
@@ -125,10 +127,12 @@ namespace SerialCommLib
 
         public bool Send(byte[] sendData)
         {
+            Debug.WriteLine("Send(byte[] sendData) 시작");
             try
             {
                 if (serialPort != null && serialPort.IsOpen)
                 {
+                    Debug.WriteLine("Send(byte[] sendData)");
                     serialPort.Write(sendData, 0, sendData.Length);
                     return true;
                 }
@@ -142,10 +146,12 @@ namespace SerialCommLib
 
         public bool Send(byte[] sendData, int offset, int count)
         {
+            Debug.WriteLine("Send(byte[] sendData, int offset, int count) 시작");
             try
             {
                 if (serialPort != null && serialPort.IsOpen)
                 {
+                    Debug.WriteLine("Send(byte[] sendData, int offset, int count) ");
                     serialPort.Write(sendData, offset, count);
                     return true;
                 }
@@ -257,7 +263,7 @@ namespace SerialCommLib
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine(ex.ToString());
+                    //Debug.WriteLine(ex.ToString());
                 }
             }
         }
