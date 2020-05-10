@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Data.SqlClient;
 using System.Diagnostics;
+//using System.Windows.Threading;
+//using System.Windows.Threading;
 
 namespace BTProductionInformation
 {
@@ -43,6 +45,10 @@ namespace BTProductionInformation
         string YKWGI_Data;
         string GJGB_Data;
 
+        //-------------------------
+        //System.Windows.
+        //System.Windows.Threading.DispatcherTimer
+        //DispatcherTimer timer = new DispatcherTimer();    //객체생성
         public BTProductionInformation()
         {
             InitializeComponent();

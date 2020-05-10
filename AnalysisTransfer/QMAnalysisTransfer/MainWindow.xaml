@@ -1,0 +1,135 @@
+﻿<Window x:Class="QMAnalysisTransfer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:QMAnalysisTransfer"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="1080" Width="1920">
+    <Window.Resources>
+
+
+
+
+
+
+    </Window.Resources>
+
+
+    <Grid>
+        <Canvas  Height="300" VerticalAlignment="Top" Background="#FFC2C9DC">
+
+            <TextBlock x:Name="tbDisplayHeatNoText" Height="46" Canvas.Left="123" TextWrapping="Wrap" Text="Heat NO" Canvas.Top="14" Width="160" FontSize="24" FontWeight="Bold"/>
+
+            <TextBlock x:Name="tbDisplayOnToTapText" Height="46" Canvas.Left="590" TextWrapping="Wrap" Text="ON TO TAP" Canvas.Top="14" Width="210" FontSize="24" FontWeight="Bold"/>
+            <Border BorderBrush="Black" CornerRadius="20" BorderThickness="1" HorizontalAlignment="Center" Height="86" VerticalAlignment="Center" Width="195" Background="Black" Canvas.Left="570" Canvas.Top="53">
+                <TextBlock x:Name="tbDisplayOnToTap" Text="098" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" Padding="0" Width="124" TextOptions.TextFormattingMode="Display" HorizontalAlignment="Center" Margin="35,-7,34,10" TextAlignment="Center" Height="81" VerticalAlignment="Bottom"/>
+            </Border>
+
+            <TextBlock x:Name="tbDisplayTapToTapText" Height="29" Canvas.Left="840" TextWrapping="Wrap" Text="TAP TO TAP" Canvas.Top="14" Width="145" FontSize="24" FontWeight="Bold"/>
+            <TextBlock x:Name="tbDisplayTapToTap" HorizontalAlignment="Left" Height="86" TextWrapping="Wrap" Text="098" VerticalAlignment="Top" Width="190" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" TextAlignment="Center" Canvas.Left="840" Canvas.Top="53">
+                <TextBlock.Background>
+                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}"/>
+                </TextBlock.Background>
+            </TextBlock>
+
+            <TextBlock x:Name="tbDisplayWattText" Height="39" Canvas.Left="1090" TextWrapping="Wrap" Text="Watt" Canvas.Top="14" Width="70" FontSize="24" FontWeight="Bold"/>
+            <TextBlock x:Name="tbDisplayWatt" HorizontalAlignment="Left" Height="86" TextWrapping="Wrap" Text="098" VerticalAlignment="Top" Width="190" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" TextAlignment="Center" Canvas.Left="1079" Canvas.Top="53">
+                <TextBlock.Background>
+                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}"/>
+                </TextBlock.Background>
+            </TextBlock>
+
+            <TextBlock x:Name="tbDisplayTempText" Height="46" Canvas.Left="1355" TextWrapping="Wrap" Text="Temp" Canvas.Top="14" Width="110" FontSize="24" FontWeight="Bold"/>
+            <TextBlock x:Name="tbDisplayTemp" HorizontalAlignment="Left" Height="86" TextWrapping="Wrap" Text="098" VerticalAlignment="Top" Width="190" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" TextAlignment="Center" Canvas.Left="1325" Canvas.Top="53">
+                <TextBlock.Background>
+                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}"/>
+                </TextBlock.Background>
+            </TextBlock>
+
+            <TextBlock x:Name="tbDisplayCText" Height="32" Canvas.Left="75" TextWrapping="Wrap" Text="C" Canvas.Top="153" Width="40" FontSize="24" FontWeight="Bold"/>
+            <TextBlock x:Name="tbDisplayC" HorizontalAlignment="Left" Height="86" TextWrapping="Wrap" Text="098" VerticalAlignment="Top" Width="190" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" TextAlignment="Center" Canvas.Left="24" Canvas.Top="190">
+                <TextBlock.Background>
+                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}"/>
+                </TextBlock.Background>
+            </TextBlock>
+
+            <TextBlock x:Name="tbDisplaySiText" Height="32" Canvas.Left="232" TextWrapping="Wrap" Text="Si" Canvas.Top="153" Width="51" FontSize="24" FontWeight="Bold"/>
+            <TextBlock x:Name="tbDisplaySi" HorizontalAlignment="Left" Height="86" TextWrapping="Wrap" Text="098" VerticalAlignment="Top" Width="190" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" TextAlignment="Center" Canvas.Left="232" Canvas.Top="190">
+                <TextBlock.Background>
+                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}"/>
+                </TextBlock.Background>
+            </TextBlock>
+
+            <TextBlock x:Name="tbDisplayMnText" Height="32" Canvas.Left="469" TextWrapping="Wrap" Text="Mn" Canvas.Top="153" Width="66" FontSize="24" FontWeight="Bold"/>
+            <TextBlock x:Name="tbDisplayMn" HorizontalAlignment="Left" Height="86" TextWrapping="Wrap" Text="098" VerticalAlignment="Top" Width="190" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" TextAlignment="Center" Canvas.Left="440" Canvas.Top="190">
+                <TextBlock.Background>
+                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}"/>
+                </TextBlock.Background>
+            </TextBlock>
+
+            <TextBlock x:Name="tbDisplayPText" Height="32" Canvas.Left="650" TextWrapping="Wrap" Text="P" Canvas.Top="153" Width="40" FontSize="24" FontWeight="Bold"/>
+            <TextBlock x:Name="tbDisplayP" HorizontalAlignment="Left" Height="86" TextWrapping="Wrap" Text="098" VerticalAlignment="Top" Width="190" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" TextAlignment="Center" Canvas.Left="650" Canvas.Top="190">
+                <TextBlock.Background>
+                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}"/>
+                </TextBlock.Background>
+            </TextBlock>
+
+            <TextBlock x:Name="tbDisplaySText" Height="32" Canvas.Left="883" TextWrapping="Wrap" Text="S" Canvas.Top="153" Width="32" FontSize="24" FontWeight="Bold"/>
+            <TextBlock x:Name="tbDisplayS" HorizontalAlignment="Left" Height="86" TextWrapping="Wrap" Text="098" VerticalAlignment="Top" Width="190" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" TextAlignment="Center" Canvas.Left="855" Canvas.Top="190">
+                <TextBlock.Background>
+                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}"/>
+                </TextBlock.Background>
+            </TextBlock>
+
+            <TextBlock x:Name="tbDisplayCuText" Height="32" Canvas.Left="1100" TextWrapping="Wrap" Text="Cu" Canvas.Top="153" Width="60" FontSize="24" FontWeight="Bold"/>
+            <TextBlock x:Name="tbDisplayCu" HorizontalAlignment="Left" Height="86" TextWrapping="Wrap" Text="098" VerticalAlignment="Top" Width="190" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" TextAlignment="Center" Canvas.Left="1079" Canvas.Top="190">
+                <TextBlock.Background>
+                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}"/>
+                </TextBlock.Background>
+            </TextBlock>
+
+            <TextBlock x:Name="tbDisplayCrText" Height="27" Canvas.Left="1340" TextWrapping="Wrap" Text="Cr" Canvas.Top="153" Width="52" FontSize="24" FontWeight="Bold"/>
+            <TextBlock x:Name="tbDisplayCr" HorizontalAlignment="Left" Height="86" TextWrapping="Wrap" Text="098" VerticalAlignment="Top" Width="190" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" TextAlignment="Center" Canvas.Left="1295" Canvas.Top="190">
+                <TextBlock.Background>
+                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}"/>
+                </TextBlock.Background>
+            </TextBlock>
+
+            <TextBlock x:Name="tbDisplayNiText" Height="28" Canvas.Left="1559" TextWrapping="Wrap" Text="CEQ" Canvas.Top="153" Width="56" FontSize="24" FontWeight="Bold"/>
+            <TextBlock x:Name="tbDisplayNi" HorizontalAlignment="Left" Height="86" TextWrapping="Wrap" Text="098" VerticalAlignment="Top" Width="190" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" TextAlignment="Center" Canvas.Left="1490" Canvas.Top="190">
+                <TextBlock.Background>
+                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}"/>
+                </TextBlock.Background>
+            </TextBlock>
+
+            <TextBlock x:Name="tbDisplayVText" Height="30" Canvas.Left="1795" TextWrapping="Wrap" Text="V" Canvas.Top="153" Width="39" FontSize="24" FontWeight="Bold"/>
+            <TextBlock x:Name="tbDisplayV" HorizontalAlignment="Left" Height="86" TextWrapping="Wrap" Text="098" VerticalAlignment="Top" Width="190" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" TextAlignment="Center" Canvas.Left="1695" Canvas.Top="190" RenderTransformOrigin="0.5,0.523">
+                <TextBlock.Background>
+                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}"/>
+                </TextBlock.Background>
+            </TextBlock>
+            <Border BorderBrush="Black" CornerRadius="20" BorderThickness="1" HorizontalAlignment="Left" Height="86" VerticalAlignment="Top" Width="318" Background="Black" Canvas.Left="24" Canvas.Top="53">
+                <TextBlock x:Name="tbDisplayHeatNo"  HorizontalAlignment="Center" Height="98"  Text="203401" VerticalAlignment="Center" Width="315"  Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" TextAlignment="Center" Margin="26,5,17,5">
+                    <TextBlock.Background>
+                        <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}"/>
+                    </TextBlock.Background>
+                </TextBlock>
+            </Border>
+
+
+
+
+        </Canvas>
+        <Border BorderThickness="1" CornerRadius="20" Margin="0,839,0,0" Background="#FF19664E">
+            <Image x:Name="image" Margin="9,9,0,9" Source="이미지/생산정보표시.jpg" Stretch="Fill" HorizontalAlignment="Left" Width="675"/>
+        </Border>
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="160" Margin="840,865,0,0" VerticalAlignment="Top" Width="410" Background="#FFD5D8C5">
+            <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Height="110" TextWrapping="Wrap" Text="142" VerticalAlignment="Top" Width="150" Margin="204,24,0,0" FontSize="72" FontWeight="Bold"/>
+        </Border>
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="160" Margin="1355,865,0,0" VerticalAlignment="Top" Width="410" Background="#FFD5D8C5">
+            <TextBlock x:Name="textBlock1" HorizontalAlignment="Left" Height="110" TextWrapping="Wrap" Text="89" VerticalAlignment="Top" Width="150" Margin="204,24,0,0" FontSize="72" FontWeight="Bold"/>
+        </Border>
+
+    </Grid>
+</Window>
