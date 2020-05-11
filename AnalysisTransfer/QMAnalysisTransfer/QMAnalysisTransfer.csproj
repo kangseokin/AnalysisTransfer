@@ -63,6 +63,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Ini.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -96,6 +97,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="이미지\생산정보표시.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SerialCommLib\SerialCommLib.csproj">
+      <Project>{0D848F61-CD42-4343-ACD9-13C75C6E73F6}</Project>
+      <Name>SerialCommLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
