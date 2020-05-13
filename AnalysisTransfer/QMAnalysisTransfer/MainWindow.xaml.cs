@@ -1,6 +1,7 @@
 ﻿using SerialCommLib;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
@@ -9,6 +10,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -82,6 +84,15 @@ namespace QMAnalysisTransfer
         Parity SerialParity;
         Handshake SerialHandshake;
         //----------------------------------------------------------------
+
+        List<TransferData> transferdata = new List<TransferData>();
+
+        //---------------------------------------------------------------------
+
+        List<ElectricfurnaceWorkEndData> electricfurnaceworkenddata = new List<ElectricfurnaceWorkEndData>();
+
+        //------------------------------------------
+
         public MainWindow()
         {
             InitializeComponent();
@@ -101,7 +112,7 @@ namespace QMAnalysisTransfer
 
             this.SizeChanged += new SizeChangedEventHandler(MainWindow_SizeChanged);
             //-----------------------------------
-            timer.Interval = TimeSpan.FromMilliseconds(1);    //시간간격 설정
+            timer.Interval = TimeSpan.FromMilliseconds(1000);    //시간간격 설정
             timer.Tick += new EventHandler(timer_Tick);          //이벤트 추가
             timer.Start();                                       //타이머 시작. 종료는 timer.Stop(); 으로 한다
 
@@ -121,6 +132,10 @@ namespace QMAnalysisTransfer
             serial.DisconnectedHandler = DisconnectedHandler;
 
             serial.OpenComm(SerialPortName, SerialBaudRate, SerialDataBits, SerialStopBits, SerialParity, SerialHandshake);
+
+            dgTransferData.ItemsSource = transferdata;
+
+            dgElectricfurnaceWorkEndData.ItemsSource = electricfurnaceworkenddata;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -129,10 +144,11 @@ namespace QMAnalysisTransfer
 
             serial.CloseComm();
 
+            DeleteListAll();
             m_ServerSocket = null;
             m_ClientSocket = null;
 
-            //DeleteListAll();
+            
         }
 
         private void DeleteListAll()
@@ -318,6 +334,8 @@ namespace QMAnalysisTransfer
             tbBTHCNM.Text = HCNM_Data;
             tbBTYKWGI.Text = YKWGI_Data;
             tbBTGJGB.Text = GJGB_Data;
+
+            //Debug.WriteLine("sdfsdf");
         }
 
         #endregion
@@ -477,6 +495,8 @@ namespace QMAnalysisTransfer
 
                 //MessageBox.Show("."+AnalysisData.HeatNO+".");
 
+                AnalysisData.TransTimeData = DateTime.Now;
+
                 // 검사 구분을 추출.
                 switch (AnalysisData.HeatNO[AnalysisData.HeatNO.Length - 1])
                 {
@@ -573,9 +593,51 @@ namespace QMAnalysisTransfer
                 byte[] aassdd = Encoding.UTF8.GetBytes(SendData);
 
 
-                //serial.Send(SendData);
+                serial.Send(SendData);
 
                 
+                
+                this.Dispatcher.Invoke(new Action(delegate ()
+                {
+                    /*
+                    list.Add(new Sorting_Information(index++, ((Sort_Name)Kind.SelectedIndex).ToString(), ((Data_State)sort_state.SelectedIndex).ToString(), time)); 
+                    sortGrid.Items.Refresh();
+                     */
+
+                    tbJLT.Text = AnalysisData.JLT;
+
+                    //var uriSource = new Uri(@"/이미지/녹색원 체크 표시.png", UriKind.Relative);
+                    //imTransOK.Source = new BitmapImage(uriSource);
+                    
+
+                    transferdata.Add(new TransferData(AnalysisData.TransTimeData,
+                                                      AnalysisData.HeatNO, 
+                                                      AnalysisData.JLT, 
+                                                      ((int)Math.Round(AnalysisData.C_Data * 100)).ToString(),
+                                                      ((int)Math.Round(AnalysisData.Si_Data * 100)).ToString(),
+                                                      MnData,
+                                                      ((int)Math.Round(AnalysisData.P_Data * 1000)).ToString(),
+                                                      ((int)Math.Round(AnalysisData.S_Data * 1000)).ToString(),
+                                                      ((int)Math.Round(AnalysisData.Cu_Data * 100)).ToString(),
+                                                      ((int)Math.Round(AnalysisData.Cr_Data * 100)).ToString(),
+                                                      ((int)Math.Round(AnalysisData.CE_Data * 100)).ToString(),
+                                                      ((int)Math.Round(AnalysisData.V_Data * 1000)).ToString()));
+                    dgTransferData.Items.Refresh();
+
+
+                    if (AnalysisData.JLT == "용락")
+                    {
+                        FrontHeatNo = AnalysisData.HeatNO;
+                    }
+
+
+
+                    TransOKflag = true;
+                    //dataGrid.Items.Add(new TransferData() { Datetime= AnalysisData.TransTimeData, Heatno=AnalysisData.HeatNO, JLT=AnalysisData.JLT });
+                }));
+                
+
+
             }
             else
             {
@@ -816,6 +878,38 @@ namespace QMAnalysisTransfer
                 SerialINI.Save(INIFilePath);
             }
         }
+        bool Onflag = true;
+        void ReceivLampOnOff()
+        {
+            //ReceivLamp.Source = 이미지/녹색원.png;
+
+            if (Onflag)
+            {
+                var uriSource = new Uri(@"/이미지/녹색원.png", UriKind.Relative);
+                ReceivLamp.Source = new BitmapImage(uriSource);
+                Onflag = false;
+            } else
+            {
+                ReceivLamp.Source = null;
+                Onflag = true;
+            }
+        }
+
+        void TransOKLamp()
+        {
+                var uriSource = new Uri(@"/이미지/ok_accept_15562.png", UriKind.Relative);
+            imTransOK.Source = new BitmapImage(uriSource);
+                Onflag = false;
+        }
+
+
+        bool TransOKflag = false;
+
+        string FrontHeatNo;
+        string FrontOnToTap;
+        string FrontTapToTap;
+        string FrontWatt;
+
 
         private void DataReceivedHandler(byte[] receiveData)
         {
@@ -823,6 +917,18 @@ namespace QMAnalysisTransfer
             char ReadData;
             string EleValue = "";
             int tryint;
+
+            this.Dispatcher.Invoke(new Action(delegate ()
+            {
+                ReceivLampOnOff();
+
+            }));
+
+            
+            //if (serial.IsOpen) Debug.WriteLine("com open");
+            //else Debug.WriteLine("com close");
+            Thread.Sleep(100);
+
             //Debug.WriteLine(ex.ToString()5);
             while (ReadIndex < receiveData.Length)
             {
@@ -884,7 +990,14 @@ namespace QMAnalysisTransfer
 
                                     this.Dispatcher.Invoke(new Action(delegate ()
                                     {
+                                        // 출강
+                                        if( (EleValue == "0") && (FrontOnToTap != "0"))
+                                        {
+                                            electricfurnaceworkenddata.Add(new ElectricfurnaceWorkEndData(DateTime.Now, FrontHeatNo, FrontOnToTap, FrontTapToTap, FrontWatt, "0"));
+                                        }
+
                                         tbDisplayOnToTap.Text = EleValue;
+                                        FrontOnToTap = EleValue;
                                     }));
 
                                 }
@@ -918,6 +1031,7 @@ namespace QMAnalysisTransfer
                                     this.Dispatcher.Invoke(new Action(delegate ()
                                     {
                                         tbDisplayTapToTap.Text = EleValue;
+                                        FrontTapToTap = EleValue;
                                     }));
                                 }
                             }
@@ -948,6 +1062,7 @@ namespace QMAnalysisTransfer
                                     this.Dispatcher.Invoke(new Action(delegate ()
                                     {
                                         tbDisplayWatt.Text = EleValue;
+                                        FrontWatt = EleValue;
                                     }));
                                 }
                             }
@@ -1256,13 +1371,432 @@ namespace QMAnalysisTransfer
                 }
                 ReadIndex++;
             }
+            /*
+             transferdata.Add(new TransferData(AnalysisData.TransTimeData,
+                                                      AnalysisData.HeatNO, 
+                                                      AnalysisData.JLT, 
+                                                      ((int)Math.Round(AnalysisData.C_Data * 100)).ToString(),
+                                                      ((int)Math.Round(AnalysisData.Si_Data * 100)).ToString(),
+                                                      MnData,
+                                                      ((int)Math.Round(AnalysisData.P_Data * 1000)).ToString(),
+                                                      ((int)Math.Round(AnalysisData.S_Data * 1000)).ToString(),
+                                                      ((int)Math.Round(AnalysisData.Cu_Data * 100)).ToString(),
+                                                      ((int)Math.Round(AnalysisData.Cr_Data * 100)).ToString(),
+                                                      ((int)Math.Round(AnalysisData.CE_Data * 100)).ToString(),
+                                                      ((int)Math.Round(AnalysisData.V_Data * 1000)).ToString()));
+            */
+
+            //전송이 재대로 되었는지 판단하는 부분---------------------------------------------
+            if ( TransOKflag)
+            {
+                string MnData = Math.Round(AnalysisData.Mn_Data * 100).ToString();
+                switch (MnData.Length)
+                {
+                    case 0:
+                        MnData = "000";
+                        break;
+                    case 1:
+                        MnData = "00" + MnData;
+                        break;
+                    case 2:
+                        MnData = "0" + MnData;
+                        break;
+                }
+
+                this.Dispatcher.Invoke(new Action(delegate ()
+                {
+                    imTransOK.Source = null;
+
+                    if ((tbDisplayHeatNo.Text == AnalysisData.HeatNO.Substring(2, 4)) &&
+                         (tbDisplayC.Text == ((int)Math.Round(AnalysisData.C_Data * 100)).ToString()) &&
+                         (tbDisplaySi.Text == ((int)Math.Round(AnalysisData.Si_Data * 100)).ToString()) &&
+                         (tbDisplayMn.Text == MnData) &&
+                         (tbDisplayP.Text == ((int)Math.Round(AnalysisData.P_Data * 1000)).ToString()) &&
+                         (tbDisplayS.Text == ((int)Math.Round(AnalysisData.S_Data * 1000)).ToString()) &&
+                         (tbDisplayCu.Text == ((int)Math.Round(AnalysisData.Cu_Data * 100)).ToString()) &&
+                         (tbDisplayCr.Text == ((int)Math.Round(AnalysisData.Cr_Data * 100)).ToString()) &&
+                         (tbDisplayNi.Text == ((int)Math.Round(AnalysisData.CE_Data * 100)).ToString()) &&
+                         (tbDisplayV.Text == ((int)Math.Round(AnalysisData.V_Data * 1000)).ToString()))
+                    {
+                        Debug.WriteLine("전송성분이 재대로 전송이 되었다.");
+
+                        TransOKflag = false;
+
+                        TransOKLamp();
+                    }
+                    else
+                    {
+                        Debug.WriteLine("재전송해야 합니다.");
+
+                        Debug.WriteLine(((int)Math.Round(AnalysisData.C_Data * 100)).ToString());
+                        Debug.WriteLine(((int)Math.Round(AnalysisData.Si_Data * 100)).ToString());
+                        Debug.WriteLine(MnData);
+                        Debug.WriteLine(((int)Math.Round(AnalysisData.P_Data * 1000)).ToString());
+                        Debug.WriteLine(((int)Math.Round(AnalysisData.S_Data * 1000)).ToString());
+                        Debug.WriteLine(((int)Math.Round(AnalysisData.Cu_Data * 100)).ToString());
+                        Debug.WriteLine(((int)Math.Round(AnalysisData.Cr_Data * 100)).ToString());
+                        Debug.WriteLine(((int)Math.Round(AnalysisData.CE_Data * 100)).ToString());
+                        Debug.WriteLine(((int)Math.Round(AnalysisData.V_Data * 1000)).ToString());
+                    }
+                }));
+
+
+                
+
+            }
+
+
+            //-----------------------------------------------
+
+
+
         }
 
         private void DisconnectedHandler()
         {
-            Console.WriteLine("serial disconnected");
+            Debug.WriteLine("serial disconnected");
         }
 
         #endregion
     }
+
+    //List<TransferData> transferdata = new List<TransferData>();
+    //dgTransferData.ItemsSource = transferdata;
+    class TransferData : INotifyPropertyChanged
+    {
+        DateTime _Datetime { set; get; }
+        public DateTime Datetime
+        {
+            set
+            {
+                _Datetime = value;
+                Notify("Datetime");
+            }
+            get
+            {
+                return _Datetime;
+            }
+        }
+
+        string _HeatNo { set; get; }
+        public string HeatNo
+        {
+            set
+            {
+                _HeatNo = value;
+                Notify("HeatNo");
+            }
+            get
+            {
+                return _HeatNo;
+            }
+        }
+
+
+        string _JLT { set; get; }
+        public string JLT
+        {
+            set
+            {
+                _JLT = value;
+                Notify("JLT");
+            }
+            get
+            {
+                return _JLT;
+            }
+        }
+
+
+        string _Cdata { set; get; }
+        public string Cdata
+        {
+            set
+            {
+                _Cdata = value;
+                Notify("Cdata");
+            }
+            get
+            {
+                return _Cdata;
+            }
+        }
+
+
+        string _Sidata { set; get; }
+        public string Sidata
+        {
+            set
+            {
+                _Sidata = value;
+                Notify("Sidata");
+            }
+            get
+            {
+                return _Sidata;
+            }
+        }
+
+        string _Mndata { set; get; }
+        public string Mndata
+        {
+            set
+            {
+                _Mndata = value;
+                Notify("Mndata");
+            }
+            get
+            {
+                return _Mndata;
+            }
+        }
+
+        string _Pdata { set; get; }
+        public string Pdata
+        {
+            set
+            {
+                _Pdata = value;
+                Notify("Pdata");
+            }
+            get
+            {
+                return _Pdata;
+            }
+        }
+
+        string _Sdata { set; get; }
+        public string Sdata
+        {
+            set
+            {
+                _Sdata = value;
+                Notify("Sdata");
+            }
+            get
+            {
+                return _Sdata;
+            }
+        }
+
+        string _Cudata { set; get; }
+        public string Cudata
+        {
+            set
+            {
+                _Cudata = value;
+                Notify("Cudata");
+            }
+            get
+            {
+                return _Cudata;
+            }
+        }
+
+        string _Crdata { set; get; }
+        public string Crdata
+        {
+            set
+            {
+                _Crdata = value;
+                Notify("Crdata");
+            }
+            get
+            {
+                return _Crdata;
+            }
+        }
+
+        string _Nidata { set; get; }
+        public string Nidata
+        {
+            set
+            {
+                _Nidata = value;
+                Notify("Nidata");
+            }
+            get
+            {
+                return _Nidata;
+            }
+        }
+
+        string _Vdata { set; get; }
+        public string Vdata
+        {
+            set
+            {
+                _Vdata = value;
+                Notify("Vdata");
+            }
+            get
+            {
+                return _Vdata;
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public TransferData(DateTime datetime, string heatno, string jlt, string cdata, string sidata, string mndata, string pdata, string sdata, string cudata, string crdata, string nidata, string vdata)
+        {
+
+            this.Datetime = datetime;
+            this.HeatNo = heatno;
+            this.JLT = jlt;
+            this.Cdata = cdata;
+            this.Sidata = sidata;
+            this.Mndata = mndata;
+            this.Pdata = pdata;
+            this.Sdata = sdata;
+            this.Cudata = cudata;
+            this.Crdata = crdata;
+            this.Nidata = nidata;
+            this.Vdata = vdata;
+        }
+
+        protected void Notify(string propName)
+        {
+            if (this.PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propName));
+            }
+        }
+
+    }
+
+    //List<ElectricfurnaceWorkEndData> electricfurnaceworkenddata = new List<ElectricfurnaceWorkEndData>();
+    //dgElectricfurnaceWorkEndData.ItemsSource = electricfurnaceworkenddata;
+    //전기로 출강 정보
+    class ElectricfurnaceWorkEndData : INotifyPropertyChanged
+    {
+        DateTime _Datetime { set; get; }
+        public DateTime Datetime
+        {
+            set
+            {
+                _Datetime = value;
+                Notify("Datetime");
+            }
+            get
+            {
+                return _Datetime;
+            }
+        }
+
+        string _HeatNo { set; get; }
+        public string HeatNo
+        {
+            set
+            {
+                _HeatNo = value;
+                Notify("HeatNo");
+            }
+            get
+            {
+                return _HeatNo;
+            }
+        }
+
+
+        
+
+
+        string _OnToTap { set; get; }
+        public string OnToTap
+        {
+            set
+            {
+                _OnToTap = value;
+                Notify("OnToTap");
+            }
+            get
+            {
+                return _OnToTap;
+            }
+        }
+
+
+        string _TapToTap { set; get; }
+        public string TapToTap
+        {
+            set
+            {
+                _TapToTap = value;
+                Notify("TapToTap");
+            }
+            get
+            {
+                return _TapToTap;
+            }
+        }
+
+        string _Watt { set; get; }
+        public string Watt
+        {
+            set
+            {
+                _Watt = value;
+                Notify("Watt");
+            }
+            get
+            {
+                return _Watt;
+            }
+        }
+
+        string _OffToTap { set; get; }
+        public string OffToTap
+        {
+            set
+            {
+                _OffToTap = value;
+                Notify("OffToTap");
+            }
+            get
+            {
+                return _OffToTap;
+            }
+        }
+
+        string _Temp { set; get; }
+        public string Temp
+        {
+            set
+            {
+                _Temp = value;
+                Notify("Temp");
+            }
+            get
+            {
+                return _Temp;
+            }
+        }
+
+
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public ElectricfurnaceWorkEndData(DateTime datetime, string heatno, string ontotap, string taptotap, string watt, string temp)
+        {
+
+            this.Datetime = datetime;
+            this.HeatNo = heatno;
+            this.OnToTap = ontotap;
+            this.TapToTap = taptotap;
+            this.Watt = watt;
+            this.Temp = temp;
+            this.OffToTap = (int.Parse(taptotap) - int.Parse(ontotap)).ToString();
+        }
+
+        protected void Notify(string propName)
+        {
+            if (this.PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propName));
+            }
+        }
+
+    }
+
+    
 }

@@ -74,7 +74,7 @@ namespace SerialCommLib
 
                 serialPort.Encoding = new System.Text.ASCIIEncoding();
                 serialPort.NewLine = "\r\n";
-                serialPort.ErrorReceived += serialPort_ErrorReceived;
+                //serialPort.ErrorReceived += serialPort_ErrorReceived;
                 serialPort.DataReceived += serialPort_DataReceived;
 
                 serialPort.Open();
@@ -95,6 +95,11 @@ namespace SerialCommLib
             {
                 if (serialPort != null)
                 {
+                    //serialPort.ErrorReceived -= serialPort_ErrorReceived;
+                    //serialPort.DataReceived -= serialPort_DataReceived;
+                    
+                    //Thread.Sleep(100);
+
                     StopCheckSerialOpenThread();
                     serialPort.Close();
                     serialPort = null;
@@ -170,6 +175,8 @@ namespace SerialCommLib
             int bufferOffset = 0;
             int bytesToRead = serialPort.BytesToRead;
 
+            Thread.Sleep(100);
+
             while (bytesToRead > 0)
             {
                 try
@@ -189,6 +196,8 @@ namespace SerialCommLib
 
         private void serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
+            Thread.Sleep(100);
+
             try
             {
                 byte[] bytesBuffer = ReadSerialByteData();
@@ -213,16 +222,16 @@ namespace SerialCommLib
 
             switch (serialError)
             {
-                case SerialError.Frame: errorMessage = "HardWare Framing Error"; break;
-                case SerialError.Overrun: errorMessage = "Charaters Buffer Over Run"; break;
+                case SerialError.Frame: errorMessage = "하드웨어에서 프레이밍 오류를 발견 했습니다.";   break;
+                case SerialError.Overrun: errorMessage = "문자 버퍼 오버런이 발생 했습니다. 다음 문자가 손실 됩니다."; break;
 
-                case SerialError.RXOver: errorMessage = "Input Buffer OverFlow"; break;
+                case SerialError.RXOver: errorMessage = "입력된 버퍼 오버플로가 발생 했습니다. 입력된 버퍼에 공간이 없거나 또는 파일 끝 (EOF) 문자 뒤에 문자를 받았습니다."; break;
 
-                case SerialError.RXParity: errorMessage = "Founded Parity Error"; break;
-                case SerialError.TXFull: errorMessage = "Write Buffer was Fulled"; break;
+                case SerialError.RXParity: errorMessage = "하드웨어는 패리티 오류를 발견 했습니다."; break;
+                case SerialError.TXFull: errorMessage = "응용 프로그램에서 문자를 전송 하려고 했으나 출력 버퍼가 꽉 찼습니다."; break;
                 default: break;
             }
-            //Debug.WriteLine("3 : " + errorMessage);
+            Debug.WriteLine("3 : " + errorMessage);
         }
 
         private void StartCheckSerialOpenThread()

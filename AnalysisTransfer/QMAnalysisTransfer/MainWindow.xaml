@@ -21,27 +21,27 @@
 
             <TextBlock x:Name="tbDisplayHeatNoText" Height="46" Canvas.Left="123" TextWrapping="Wrap" Text="Heat NO" Canvas.Top="14" Width="160" FontSize="24" FontWeight="Bold"/>
 
-            <TextBlock x:Name="tbDisplayOnToTapText" Height="46" Canvas.Left="590" TextWrapping="Wrap" Text="ON TO TAP" Canvas.Top="14" Width="210" FontSize="24" FontWeight="Bold"/>
-            <Border BorderBrush="Black" CornerRadius="20" BorderThickness="1" HorizontalAlignment="Center" Height="86" VerticalAlignment="Center" Width="195" Background="Black" Canvas.Left="570" Canvas.Top="53">
+            <TextBlock x:Name="tbDisplayOnToTapText" Height="34" Canvas.Left="815" TextWrapping="Wrap" Text="ON TO TAP" Canvas.Top="14" Width="140" FontSize="24" FontWeight="Bold"/>
+            <Border BorderBrush="Black" CornerRadius="20" BorderThickness="1" HorizontalAlignment="Center" Height="86" VerticalAlignment="Center" Width="195" Background="Black" Canvas.Left="790" Canvas.Top="56">
                 <TextBlock x:Name="tbDisplayOnToTap" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" Padding="0" Width="124" TextOptions.TextFormattingMode="Display" HorizontalAlignment="Center" Margin="35,-7,34,10" TextAlignment="Center" Height="81" VerticalAlignment="Bottom"/>
             </Border>
 
-            <TextBlock x:Name="tbDisplayTapToTapText" Height="29" Canvas.Left="840" TextWrapping="Wrap" Text="TAP TO TAP" Canvas.Top="14" Width="145" FontSize="24" FontWeight="Bold"/>
-            <TextBlock x:Name="tbDisplayTapToTap" HorizontalAlignment="Left" Height="86" TextWrapping="Wrap" VerticalAlignment="Top" Width="190" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" TextAlignment="Center" Canvas.Left="840" Canvas.Top="53">
+            <TextBlock x:Name="tbDisplayTapToTapText" Height="29" Canvas.Left="1079" TextWrapping="Wrap" Text="TAP TO TAP" Canvas.Top="14" Width="145" FontSize="24" FontWeight="Bold"/>
+            <TextBlock x:Name="tbDisplayTapToTap" HorizontalAlignment="Left" Height="86" TextWrapping="Wrap" VerticalAlignment="Top" Width="190" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" TextAlignment="Center" Canvas.Left="1060" Canvas.Top="53">
                 <TextBlock.Background>
                     <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}"/>
                 </TextBlock.Background>
             </TextBlock>
 
-            <TextBlock x:Name="tbDisplayWattText" Height="39" Canvas.Left="1090" TextWrapping="Wrap" Text="Watt" Canvas.Top="14" Width="70" FontSize="24" FontWeight="Bold"/>
-            <TextBlock x:Name="tbDisplayWatt" HorizontalAlignment="Left" Height="86" TextWrapping="Wrap" VerticalAlignment="Top" Width="190" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" TextAlignment="Center" Canvas.Left="1079" Canvas.Top="53">
+            <TextBlock x:Name="tbDisplayWattText" Height="39" Canvas.Left="1405" TextWrapping="Wrap" Text="Watt" Canvas.Top="14" Width="70" FontSize="24" FontWeight="Bold"/>
+            <TextBlock x:Name="tbDisplayWatt" HorizontalAlignment="Left" Height="86" TextWrapping="Wrap" VerticalAlignment="Top" Width="190" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" TextAlignment="Center" Canvas.Left="1340" Canvas.Top="53">
                 <TextBlock.Background>
                     <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}"/>
                 </TextBlock.Background>
             </TextBlock>
 
-            <TextBlock x:Name="tbDisplayTempText" Height="46" Canvas.Left="1355" TextWrapping="Wrap" Text="Temp" Canvas.Top="14" Width="110" FontSize="24" FontWeight="Bold"/>
-            <TextBlock x:Name="tbDisplayTemp" HorizontalAlignment="Left" Height="86" TextWrapping="Wrap" VerticalAlignment="Top" Width="190" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" TextAlignment="Center" Canvas.Left="1325" Canvas.Top="53">
+            <TextBlock x:Name="tbDisplayTempText" Height="39" Canvas.Left="1660" TextWrapping="Wrap" Text="Temp" Canvas.Top="14" Width="80" FontSize="24" FontWeight="Bold"/>
+            <TextBlock x:Name="tbDisplayTemp" HorizontalAlignment="Left" Height="86" TextWrapping="Wrap" VerticalAlignment="Top" Width="190" Foreground="#FFFB0202" FontSize="72" FontWeight="Bold" TextAlignment="Center" Canvas.Left="1605" Canvas.Top="53">
                 <TextBlock.Background>
                     <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.WindowTextColorKey}}"/>
                 </TextBlock.Background>
@@ -116,6 +116,9 @@
                     </TextBlock.Background>
                 </TextBlock>
             </Border>
+            <TextBlock x:Name="tbJLT" Height="48" Canvas.Left="405" TextWrapping="Wrap" Canvas.Top="46" Width="105" FontSize="36" FontWeight="Bold"/>
+            <Image x:Name="ReceivLamp" Height="35" Canvas.Left="419" Canvas.Top="99" Width="56" />
+            <Image x:Name="imTransOK" Height="83" Canvas.Left="528" Canvas.Top="56" Width="90" Stretch="Fill"/>
         </Canvas>
 
         <Border BorderThickness="1" CornerRadius="20" Margin="0,839,0,0" Background="#FF19664E">
@@ -131,6 +134,25 @@
         <TextBlock x:Name="tbBTYKWGI" HorizontalAlignment="Left" Height="25" TextWrapping="Wrap"  VerticalAlignment="Top" Width="365" Margin="295,950,0,0" FontSize="12" FontWeight="Bold"/>
         <TextBlock x:Name="tbBTHCNM" HorizontalAlignment="Left" Height="25" TextWrapping="Wrap"  VerticalAlignment="Top" Width="365" Margin="295,905,0,0" FontSize="12" FontWeight="Bold"/>
         <TextBlock x:Name="tbBTHeatNo" HorizontalAlignment="Left" Height="25" TextWrapping="Wrap"  VerticalAlignment="Top" Width="365" Margin="295,864,0,0" FontSize="12" FontWeight="Bold" />
+        <DataGrid x:Name="dgTransferData" AutoGenerateColumns="False" HorizontalAlignment="Left" Height="539" Margin="0,300,0,0" VerticalAlignment="Top" Width="255" AlternatingRowBackground="#FF81C15C">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="전송시간" Width="*" Binding="{Binding Datetime}"/>
+                <DataGridTextColumn Header="Heat NO." Width="60" Binding="{Binding HeatNo}"/>
+                <DataGridTextColumn Header="구분" Width="35" Binding="{Binding JLT}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <DataGrid x:Name="dgElectricfurnaceWorkEndData" AutoGenerateColumns="false" HorizontalAlignment="Left" Height="445" Margin="342,330,0,0" VerticalAlignment="Top" Width="618">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="출강 시간" Binding="{Binding Datetime}"/>
+                <DataGridTextColumn Header="Heat No" Binding="{Binding HeatNo}"/>
+                <DataGridTextColumn Header="On To Tap"  Binding="{Binding OnToTap}" />
+                <DataGridTextColumn Header="Tap To Tap"  Binding="{Binding TapToTap}" />
+
+                <DataGridTextColumn Header="Off To Tap"  Binding="{Binding OffToTap}" />
+                <DataGridTextColumn Header="WATT"  Binding="{Binding Watt}" />
+                
+            </DataGrid.Columns>
+        </DataGrid>
 
     </Grid>
 </Window>
