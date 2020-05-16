@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:QMAnalysisTransfer"
         mc:Ignorable="d"
-        Title="MainWindow" Height="1080" Width="1920" Closing="Window_Closing">
+        Title="MainWindow" Height="1080" Width="1920" Closing="Window_Closing" WindowStartupLocation="CenterScreen" WindowState="Maximized">
     <Window.Resources>
 
 
@@ -16,7 +16,7 @@
     </Window.Resources>
 
 
-    <Grid>
+    <Grid Margin="0">
         <Canvas  Height="300" VerticalAlignment="Top" Background="#FFC2C9DC">
 
             <TextBlock x:Name="tbDisplayHeatNoText" Height="46" Canvas.Left="123" TextWrapping="Wrap" Text="Heat NO" Canvas.Top="14" Width="160" FontSize="24" FontWeight="Bold"/>
@@ -124,35 +124,137 @@
         <Border BorderThickness="1" CornerRadius="20" Margin="0,839,0,0" Background="#FF19664E">
             <Image x:Name="image" Margin="9,9,0,9" Source="이미지/생산정보표시.jpg" Stretch="Fill" HorizontalAlignment="Left" Width="675"/>
         </Border>
-        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="160" Margin="840,865,0,0" VerticalAlignment="Top" Width="410" Background="#FFD5D8C5">
+        <Border BorderBrush="Black" BorderThickness="1" Margin="840,865,662,24" Background="#FFD5D8C5">
             <TextBlock x:Name="tbBTCount" HorizontalAlignment="Left" Height="110" TextWrapping="Wrap"  VerticalAlignment="Top" Width="150" Margin="204,24,0,0" FontSize="72" FontWeight="Bold"/>
         </Border>
-        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="160" Margin="1355,865,0,0" VerticalAlignment="Top" Width="410" Background="#FFD5D8C5">
+        <Border BorderBrush="Black" BorderThickness="1" Margin="1355,865,147,24" Background="#FFD5D8C5">
             <TextBlock x:Name="tbHDRCount" HorizontalAlignment="Left" Height="110" TextWrapping="Wrap"  VerticalAlignment="Top" Width="150" Margin="204,24,0,0" FontSize="72" FontWeight="Bold"/>
         </Border>
         <TextBlock x:Name="tbBTGJGB" HorizontalAlignment="Left" Height="25" TextWrapping="Wrap"  VerticalAlignment="Top" Width="365" Margin="295,1000,0,0" FontSize="12" FontWeight="Bold"/>
         <TextBlock x:Name="tbBTYKWGI" HorizontalAlignment="Left" Height="25" TextWrapping="Wrap"  VerticalAlignment="Top" Width="365" Margin="295,950,0,0" FontSize="12" FontWeight="Bold"/>
         <TextBlock x:Name="tbBTHCNM" HorizontalAlignment="Left" Height="25" TextWrapping="Wrap"  VerticalAlignment="Top" Width="365" Margin="295,905,0,0" FontSize="12" FontWeight="Bold"/>
         <TextBlock x:Name="tbBTHeatNo" HorizontalAlignment="Left" Height="25" TextWrapping="Wrap"  VerticalAlignment="Top" Width="365" Margin="295,864,0,0" FontSize="12" FontWeight="Bold" />
-        <DataGrid x:Name="dgTransferData" AutoGenerateColumns="False" HorizontalAlignment="Left" Height="539" Margin="0,300,0,0" VerticalAlignment="Top" Width="255" AlternatingRowBackground="#FF81C15C">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="전송시간" Width="*" Binding="{Binding Datetime}"/>
-                <DataGridTextColumn Header="Heat NO." Width="60" Binding="{Binding HeatNo}"/>
-                <DataGridTextColumn Header="구분" Width="35" Binding="{Binding JLT}"/>
-            </DataGrid.Columns>
-        </DataGrid>
-        <DataGrid x:Name="dgElectricfurnaceWorkEndData" AutoGenerateColumns="false" HorizontalAlignment="Left" Height="445" Margin="342,330,0,0" VerticalAlignment="Top" Width="618">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="출강 시간" Binding="{Binding Datetime}"/>
-                <DataGridTextColumn Header="Heat No" Binding="{Binding HeatNo}"/>
-                <DataGridTextColumn Header="On To Tap"  Binding="{Binding OnToTap}" />
-                <DataGridTextColumn Header="Tap To Tap"  Binding="{Binding TapToTap}" />
 
-                <DataGridTextColumn Header="Off To Tap"  Binding="{Binding OffToTap}" />
-                <DataGridTextColumn Header="WATT"  Binding="{Binding Watt}" />
-                
-            </DataGrid.Columns>
-        </DataGrid>
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="534" Margin="5,305,0,0" VerticalAlignment="Top" Width="420" CornerRadius="10">
+            <StackPanel  Margin="0,0,0,0">
+                <Border BorderBrush="Black" BorderThickness="1" Height="30" VerticalAlignment="Top" CornerRadius="10">
+                    <Border.Background>
+                        <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ActiveCaptionColorKey}}"/>
+                    </Border.Background>
+                    <TextBlock x:Name="textBlock" Height="20" TextWrapping="Wrap" Text="전송 정보" VerticalAlignment="Top" FontSize="16" FontWeight="Bold" TextAlignment="Center" Margin="39,3,42,0"/>
+                </Border>
+                <DataGrid x:Name="dgTransferData" AutoGenerateColumns="False" Height="489" VerticalAlignment="Top" BorderThickness="0" FontSize="18" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                    <DataGrid.AlternatingRowBackground>
+                        <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ControlLightColorKey}}"/>
+                    </DataGrid.AlternatingRowBackground>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="전송시간" Width="*" Binding="{Binding Datetime}"/>
+                        <DataGridTextColumn Header="Heat NO." Width="100" Binding="{Binding HeatNo}"/>
+                        <DataGridTextColumn Header="구분" Width="100" Binding="{Binding JLT}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </StackPanel>
+        </Border>
+
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="536" Margin="430,303,0,0" VerticalAlignment="Top" Width="499" CornerRadius="10">
+            <StackPanel  Margin="0,0,0,0">
+                <Border BorderBrush="Black" BorderThickness="1" Height="30" Margin="-2,0,0,0" VerticalAlignment="Top" CornerRadius="10">
+                    <Border.Background>
+                        <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ActiveCaptionColorKey}}"/>
+                    </Border.Background>
+                    <TextBlock x:Name="textBlock9" Height="20" TextWrapping="Wrap" Text="출강 정보" VerticalAlignment="Top" FontSize="16" FontWeight="Bold" TextAlignment="Center" Margin="39,3,42,0"/>
+                </Border>
+                <DataGrid x:Name="dgElectricfurnaceWorkEndData" AutoGenerateColumns="false" Height="426" VerticalAlignment="Center" BorderThickness="0" FontSize="16">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="출강 시간" Binding="{Binding Datetime}"/>
+                        <DataGridTextColumn Header="Heat No" Binding="{Binding HeatNo}"/>
+                        <DataGridTextColumn Header="On To Tap"  Binding="{Binding OnToTap}" />
+                        <DataGridTextColumn Header="Tap To Tap"  Binding="{Binding TapToTap}" />
+
+                        <DataGridTextColumn Header="Off To Tap"  Binding="{Binding OffToTap}" />
+                        <DataGridTextColumn Header="WATT"  Binding="{Binding Watt}" />
+
+                    </DataGrid.Columns>
+                </DataGrid>
+                <StackPanel Height="80" Orientation="Horizontal">
+                    <!--최저 출강 시간 표시-->
+                    <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="75" Margin="2" VerticalAlignment="Top" Width="120" CornerRadius="10" Padding="2">
+                        <StackPanel  Margin="0,0,0,0">
+                            <Border BorderBrush="Black" BorderThickness="1" Height="30" Margin="0,0,0,0" VerticalAlignment="Top" CornerRadius="10">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ScrollBarColorKey}}"/>
+                                </Border.Background>
+                                <TextBlock TextWrapping="Wrap" Text="최 저" FontSize="16" FontWeight="Bold" TextAlignment="Center" Margin="17,3,21,5"/>
+                            </Border>
+                            <TextBlock x:Name="tbMinWorkEnd" Height="39" TextWrapping="Wrap" Text="44 분" VerticalAlignment="Center" FontSize="24" FontWeight="Bold" FontStretch="UltraExpanded" TextOptions.TextFormattingMode="Display" TextAlignment="Center" Margin="10,0" Padding="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <!--최고 출강 시간 표시-->
+                    <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="75" Margin="2" VerticalAlignment="Top" Width="120" CornerRadius="10" Padding="2">
+                        <StackPanel  Margin="0,0,0,0">
+                            <Border BorderBrush="Black" BorderThickness="1" Height="30" Margin="0,0,0,0" VerticalAlignment="Top" CornerRadius="10">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ScrollBarColorKey}}"/>
+                                </Border.Background>
+                                <TextBlock TextWrapping="Wrap" Text="최 고" FontSize="16" FontWeight="Bold" TextAlignment="Center" Margin="17,3,21,5"/>
+                            </Border>
+                            <TextBlock x:Name="tbMaxWorkEnd" Height="39" TextWrapping="Wrap" Text="44 분" VerticalAlignment="Center" FontSize="24" FontWeight="Bold" FontStretch="UltraExpanded" TextOptions.TextFormattingMode="Display" TextAlignment="Center" Margin="10,0" Padding="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <!--평균 출강 시간 표시-->
+                    <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="75" Margin="2" VerticalAlignment="Top" Width="120" CornerRadius="10" Padding="2">
+                        <StackPanel  Margin="0,0,0,0">
+                            <Border BorderBrush="Black" BorderThickness="1" Height="30" Margin="0,0,0,0" VerticalAlignment="Top" CornerRadius="10">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ScrollBarColorKey}}"/>
+                                </Border.Background>
+                                <TextBlock  TextWrapping="Wrap" Text="평 균" FontSize="16" FontWeight="Bold" TextAlignment="Center" Margin="17,3,21,5"/>
+                            </Border>
+                            <TextBlock x:Name="tbAveWorkEnd" Height="39" TextWrapping="Wrap" Text="44 분" VerticalAlignment="Center" FontSize="24" FontWeight="Bold" FontStretch="UltraExpanded" TextOptions.TextFormattingMode="Display" TextAlignment="Center" Margin="10,0" Padding="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+
+                    <!--예상 CH 표시-->
+                    <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="75" Margin="2" VerticalAlignment="Top" Width="120" CornerRadius="10" Padding="2">
+                        <StackPanel  Margin="0,0,0,0">
+                            <Border BorderBrush="Black" BorderThickness="1" Height="30" Margin="0,0,0,0" VerticalAlignment="Top" CornerRadius="10">
+                                <Border.Background>
+                                    <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ScrollBarColorKey}}"/>
+                                </Border.Background>
+                                <TextBlock TextWrapping="Wrap" Text="예상 CH수" FontSize="16" FontWeight="Bold" TextAlignment="Center" Margin="17,3,21,5"/>
+                            </Border>
+                            <TextBlock x:Name="tbExpectancyWorkEnd" Height="39" TextWrapping="Wrap" Text="44 분" VerticalAlignment="Center" FontSize="24" FontWeight="Bold" FontStretch="UltraExpanded" TextOptions.TextFormattingMode="Display" TextAlignment="Center" Margin="10,0" Padding="0,5,0,0"/>
+                        </StackPanel>
+                    </Border>
+
+
+
+
+
+
+
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+
+
+
+
+
+
+        <Border BorderBrush="Black" BorderThickness="1" HorizontalAlignment="Left" Height="75" Margin="1435,655,0,0" VerticalAlignment="Top" Width="120" CornerRadius="10">
+            <StackPanel  Margin="0,0,0,0">
+                <Border BorderBrush="Black" BorderThickness="1" Height="30" Margin="-2,0,0,0" VerticalAlignment="Top" CornerRadius="10">
+                    <Border.Background>
+                        <SolidColorBrush Color="{DynamicResource {x:Static SystemColors.ActiveCaptionColorKey}}"/>
+                    </Border.Background>
+                    <TextBlock x:Name="textBlock19" TextWrapping="Wrap" Text="최 저" FontSize="16" FontWeight="Bold" TextAlignment="Center" Margin="17,3,21,5"/>
+                </Border>
+                <TextBlock x:Name="textBlock5" Height="39" TextWrapping="Wrap" Text="44 분" VerticalAlignment="Center" FontSize="24" FontWeight="Bold" FontStretch="UltraExpanded" TextOptions.TextFormattingMode="Display" TextAlignment="Center" Margin="10,0" Padding="0,5,0,0"/>
+            </StackPanel>
+        </Border>
 
     </Grid>
 </Window>

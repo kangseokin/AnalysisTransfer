@@ -1,7 +1,6 @@
 ﻿using SerialCommLib;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
@@ -93,6 +92,24 @@ namespace QMAnalysisTransfer
 
         //------------------------------------------
 
+        bool TransOKflag = false;
+        bool ElectricfurnaceWorkEndflag = false;
+
+        string FrontHeatNo="0";
+        string FrontOnToTap="0";
+        string FrontTapToTap="0";
+        string FrontWatt="0";
+
+
+        //----------------------------------------
+        Thread ERPDataBase_GetYEONJUCount_Thread;
+        Thread ERPDataBase_GetHDRCount_Thread;
+        Thread QCMANAGERData_GetLotData_Thread;
+        bool ERPDataBase_GetYEONJUCount_Thread_flag = true;
+        bool ERPDataBase_GetHDRCount_Thread_flag = true;
+        bool QCMANAGERData_GetLotData_Thread_flag = true;
+        //-------------------
+
         public MainWindow()
         {
             InitializeComponent();
@@ -112,13 +129,13 @@ namespace QMAnalysisTransfer
 
             this.SizeChanged += new SizeChangedEventHandler(MainWindow_SizeChanged);
             //-----------------------------------
-            timer.Interval = TimeSpan.FromMilliseconds(1000);    //시간간격 설정
-            timer.Tick += new EventHandler(timer_Tick);          //이벤트 추가
-            timer.Start();                                       //타이머 시작. 종료는 timer.Stop(); 으로 한다
+            //timer.Interval = TimeSpan.FromMilliseconds(1000);    //시간간격 설정
+            //timer.Tick += new EventHandler(timer_Tick);          //이벤트 추가
+            //timer.Start();                                       //타이머 시작. 종료는 timer.Stop(); 으로 한다
 
-            //----------------------------
+            //------------------------------
             비동기소켓서버시작();
-
+            
             //SerialCommINI();
             SerialPortName = "COM3";
             SerialBaudRate = 9600;
@@ -132,15 +149,194 @@ namespace QMAnalysisTransfer
             serial.DisconnectedHandler = DisconnectedHandler;
 
             serial.OpenComm(SerialPortName, SerialBaudRate, SerialDataBits, SerialStopBits, SerialParity, SerialHandshake);
-
+            
             dgTransferData.ItemsSource = transferdata;
 
             dgElectricfurnaceWorkEndData.ItemsSource = electricfurnaceworkenddata;
+            
+            //------------------------------
+            
+            ERPDataBase_GetYEONJUCount_Thread = new Thread(() => {
+                while (ERPDataBase_GetYEONJUCount_Thread_flag)
+                {
+                    Thread.Sleep(900);
+
+                    using (SqlConnection con = new SqlConnection(ConnectionStringERP10GG0))
+                    {
+                        string query = "select LOT_NO,WKRSLT_COUNT from V_MES_WKRSLT_CNT where PMEQP_NO = 'A100-10'";
+
+                        using (SqlCommand com = new SqlCommand(query, con))
+                        {
+                            try
+                            {
+                                con.Open();
+
+                                using (SqlDataReader reader = com.ExecuteReader())
+                                {
+                                    if (reader.HasRows)
+                                    {
+                                        reader.Read();
+
+                                        YEONJU_LotNo = reader.GetString(0);
+
+                                        YEONJU_Count = (int)reader.GetDecimal(1);
+                                    }
+                                }
+
+                                //tbBTCount.Text = YEONJU_Count.ToString();
+                                //this.Invoke(new Action(delegate () // this == Form 이다. Form이 아닌 컨트롤의 Invoke를 직접호출해도 무방하다. 
+                                //{ //Invoke를 통해 lbl_Result 컨트롤에 결과값을 업데이트한다. 
+                                //    lbl_Result.Text = result.ToString(); 6
+                                //}));
+                                tbBTCount.Dispatcher.Invoke(new Action(delegate ()
+                               {
+                                   tbBTCount.Text = YEONJU_Count.ToString();
+                               }));
+
+                            }
+                            catch (Exception ex)
+                            {
+                                // Anything you want to do with ex
+                            }
+                            finally
+                            {
+                                con.Close();
+                            }
+                        }
+                    }
+                }
+            });
+
+
+
+
+            ERPDataBase_GetYEONJUCount_Thread.IsBackground = true;
+
+            ERPDataBase_GetYEONJUCount_Thread.Start();
+
+            //----------------------------
+            ERPDataBase_GetHDRCount_Thread = new Thread(() => {
+                while (ERPDataBase_GetHDRCount_Thread_flag)
+                {
+                    Thread.Sleep(900);
+
+                    using (SqlConnection con = new SqlConnection(ConnectionStringERP10GG0))
+                    {
+                        string query = "select LOT_NO,WKRSLT_COUNT from V_MES_WKRSLT_CNT where PMEQP_NO = 'B100-10'";
+
+                        using (SqlCommand com = new SqlCommand(query, con))
+                        {
+                            try
+                            {
+                                con.Open();
+
+                                using (SqlDataReader reader = com.ExecuteReader())
+                                {
+                                    if (reader.HasRows)
+                                    {
+                                        reader.Read();
+
+                                        HDR_LotNo = reader.GetString(0);
+
+                                        HDR_Count = (int)reader.GetDecimal(1);
+                                    }
+
+                                    tbBTCount.Dispatcher.Invoke(new Action(delegate ()
+                                    {
+                                        tbHDRCount.Text = HDR_Count.ToString();
+                                    }));
+
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                // Anything you want to do with ex
+                            }
+                            finally
+                            {
+                                con.Close();
+                            }
+                        }
+                    }
+                }
+            });
+
+            ERPDataBase_GetHDRCount_Thread.IsBackground = true;
+
+            ERPDataBase_GetHDRCount_Thread.Start();
+            //-----------------------------
+            ////QCMANAGERData_GetLotData(YEONJU_LotNo, out GJGB_Data, out HCNM_Data, out YKWGI_Data); //생산 정보 가져오기
+            QCMANAGERData_GetLotData_Thread = new Thread(() => {
+                while (QCMANAGERData_GetLotData_Thread_flag)
+                {
+                    Thread.Sleep(900);
+
+                    using (SqlConnection con = new SqlConnection(ConnectionStringQCMANAGER_Data))
+                    {
+                        //string commandString = "select HCNM,YKWGI,GJGB from dbo.TQCQ1100 where (HeatNo = '" + YEONJULotNo + "') and  (GSGB='T');"; // 여기에 T/D를 구분하는 쿼리를 넣어야 한다.
+                        string query = "select HCNM,YKWGI,GJGB from dbo.TQCQ1100 where (HeatNo = '" + YEONJU_LotNo + "') and  (GSGB='T');";
+
+                        using (SqlCommand com = new SqlCommand(query, con))
+                        {
+                            try
+                            {
+                                con.Open();
+
+                                using (SqlDataReader reader = com.ExecuteReader())
+                                {
+                                    if (reader.Read())
+                                    {
+                                        HCNM_Data = reader.GetString(0);
+
+                                        YKWGI_Data = reader.GetDecimal(1).ToString();
+
+                                        GJGB_Data = reader.GetString(2);
+
+                                        tbBTCount.Dispatcher.Invoke(new Action(delegate ()
+                                        {
+                                            tbBTHeatNo.Text = YEONJU_LotNo;
+                                            tbBTHCNM.Text = HCNM_Data;
+                                            tbBTYKWGI.Text = YKWGI_Data;
+                                            tbBTGJGB.Text = GJGB_Data;
+
+                                            //Debug.WriteLine(YEONJU_LotNo);
+                                        }));
+
+
+                                        reader.Close();
+                                    }
+                                }
+
+
+                            }
+                            catch (Exception ex)
+                            {
+                                // Anything you want to do with ex
+                            }
+                            finally
+                            {
+                                con.Close();
+                            }
+                        }
+                    }
+                }
+            });
+
+            QCMANAGERData_GetLotData_Thread.IsBackground = true;
+
+            QCMANAGERData_GetLotData_Thread.Start();
+            //-----------------------------
+
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            timer.Stop();
+            //ERPDataBase_GetYEONJUCount_Thread.
+            //timer.Stop();
+            ERPDataBase_GetYEONJUCount_Thread_flag = false;
+            ERPDataBase_GetHDRCount_Thread_flag = false;
+            QCMANAGERData_GetLotData_Thread_flag = false;
+
 
             serial.CloseComm();
 
@@ -226,6 +422,7 @@ namespace QMAnalysisTransfer
             finally
             {
                 ERPDataBase_conn.Close();
+                Thread.Sleep(1000);
             }
         }
 
@@ -264,6 +461,7 @@ namespace QMAnalysisTransfer
             finally
             {
                 ERPDataBase_conn.Close();
+                Thread.Sleep(1000);
             }
         }
 
@@ -318,24 +516,29 @@ namespace QMAnalysisTransfer
 
         private void timer_Tick(object sender, EventArgs e)
         {
-            //카운트 데이터 가져오기
-            ERPDataBase_GetYEONJUCount(out YEONJU_LotNo, out YEONJU_Count); //연주 절단 카운트 가져오기
+            try
+            {
+                //카운트 데이터 가져오기
+                ERPDataBase_GetYEONJUCount(out YEONJU_LotNo, out YEONJU_Count); //연주 절단 카운트 가져오기
 
-            ERPDataBase_GetHDRCount(out HDR_LotNo, out HDR_Count); //압연 HDR 장입 카운트 가져오기
+                //ERPDataBase_GetHDRCount(out HDR_LotNo, out HDR_Count); //압연 HDR 장입 카운트 가져오기
 
-            QCMANAGERData_GetLotData(YEONJU_LotNo, out GJGB_Data, out HCNM_Data, out YKWGI_Data); //생산 정보 가져오기
+                //QCMANAGERData_GetLotData(YEONJU_LotNo, out GJGB_Data, out HCNM_Data, out YKWGI_Data); //생산 정보 가져오기
 
-            // 카운트 표시
-            tbBTCount.Text = YEONJU_Count.ToString();
+                // 카운트 표시
+                tbBTCount.Text = YEONJU_Count.ToString();
 
-            tbHDRCount.Text = HDR_Count.ToString();
+                tbHDRCount.Text = HDR_Count.ToString();
 
-            tbBTHeatNo.Text = YEONJU_LotNo;
-            tbBTHCNM.Text = HCNM_Data;
-            tbBTYKWGI.Text = YKWGI_Data;
-            tbBTGJGB.Text = GJGB_Data;
-
-            //Debug.WriteLine("sdfsdf");
+                tbBTHeatNo.Text = YEONJU_LotNo;
+                tbBTHCNM.Text = HCNM_Data;
+                tbBTYKWGI.Text = YKWGI_Data;
+                tbBTGJGB.Text = GJGB_Data;
+            } catch
+            {
+                //Debug.WriteLine("sdfsdf");
+            }
+            
         }
 
         #endregion
@@ -445,30 +648,30 @@ namespace QMAnalysisTransfer
 
             public string HeatNO;  // Heat NO
 
-            public Double FE_Data;    // FE  분석 성분 값
-            public Double C_Data;     // C   분석 성분 값
-            public Double Si_Data;    // Si  분석 성분 값
-            public Double Mn_Data;    // Mn  분석 성분 값
-            public Double P_Data;     // P   분석 성분 값
-            public Double S_Data;     // S   분석 성분 값
-            public Double Cu_Data;    // Cu  분석 성분 값
-            public Double Cr_Data;    // Cr  분석 성분 값
-            public Double Ni_Data;    // Ni  분석 성분 값
-            public Double V_Data;     // V   분석 성분 값
-            public Double Nb_Data;    // Nb  분석 성분 값
-            public Double Mo_Data;    // Mo  분석 성분 값
-            public Double Ti_Data;    // Ti  분석 성분 값
-            public Double Al_Data;    // Al  분석 성분 값
-            public Double Sn_Data;    // Sn  분석 성분 값
-            public Double W_Data;     // W   분석 성분 값
-            public Double As_Data;    // As  분석 성분 값
-            public Double Sb_Data;    // Sb  분석 성분 값
-            public Double Pb_Data;    // Pb  분석 성분 값
-            public Double N_Data;     // N   분석 성분 값
-            public Double Ca_Data;    // Ca   분석 성분 값
-            public Double Zn_Data;    // Zn  분석 성분 값
-            public Double INT_Data;   // Int 분석 성분 값
-            public Double CE_Data;    // CE  분석 성분 값
+            public float FE_Data;    // FE  분석 성분 값
+            public float C_Data;     // C   분석 성분 값
+            public float Si_Data;    // Si  분석 성분 값
+            public float Mn_Data;    // Mn  분석 성분 값
+            public float P_Data;     // P   분석 성분 값
+            public float S_Data;     // S   분석 성분 값
+            public float Cu_Data;    // Cu  분석 성분 값
+            public float Cr_Data;    // Cr  분석 성분 값
+            public float Ni_Data;    // Ni  분석 성분 값
+            public float V_Data;     // V   분석 성분 값
+            public float Nb_Data;    // Nb  분석 성분 값
+            public float Mo_Data;    // Mo  분석 성분 값
+            public float Ti_Data;    // Ti  분석 성분 값
+            public float Al_Data;    // Al  분석 성분 값
+            public float Sn_Data;    // Sn  분석 성분 값
+            public float W_Data;     // W   분석 성분 값
+            public float As_Data;    // As  분석 성분 값
+            public float Sb_Data;    // Sb  분석 성분 값
+            public float Pb_Data;    // Pb  분석 성분 값
+            public float N_Data;     // N   분석 성분 값
+            public float Ca_Data;    // Ca   분석 성분 값
+            public float Zn_Data;    // Zn  분석 성분 값
+            public float INT_Data;   // Int 분석 성분 값
+            public float CE_Data;    // CE  분석 성분 값
 
             public string JLT;        // 분석 구분자 (J:용락, L:래들, T:턴디쉬)
 
@@ -476,7 +679,7 @@ namespace QMAnalysisTransfer
         }
 
         AnalysisDataStruct AnalysisData;
-
+        //전송받은데이터에서항목별로데이터추출("HK      [086084T                            FE   97.718C    .48970SI   .01986MN   .04615P    .02845S    .05308CU   .31849CR   .09907V    .00000NI   .07710NB   .00778MO   .03682TI   .00000AL   .91860SN   .01344W    .12702AS   .02638SB   .01511PB   .00000ZN   .00478N    .00000INT  7.6728CE   .55094                                                                                        HK      [086084T                            FE   97.718C    .48970SI   .01986MN   .04615P    .02845S    .05308CU   .31849CR   .09907V    .00000NI   .07710NB   .00778MO   .03682TI   .00000AL   .91860SN   .01344W    .12702           AS   .02638SB   .01511PB   .00000ZN   .00478N    .00000INT  7.6728CE   .55094                                                                                        ");
         public int 전송받은데이터에서항목별로데이터추출(string TransReadData)
         {
             //"HK      [086084T                            FE   97.718C    .48970SI   .01986MN   .04615P    .02845S    .05308CU   .31849CR   .09907V    .00000NI   .07710NB   .00778MO   .03682TI   .00000AL   .91860SN   .01344W    .12702           AS   .02638SB   .01511PB   .00000ZN   .00478N    .00000INT  7.6728CE   .55094                                                                                        HK      [086084T                            FE   97.718C    .48970SI   .01986MN   .04615P    .02845S    .05308CU   .31849CR   .09907V    .00000NI   .07710NB   .00778MO   .03682TI   .00000AL   .91860SN   .01344W    .12702           AS   .02638SB   .01511PB   .00000ZN   .00478N    .00000INT  7.6728CE   .55094                                                                                        ";
@@ -484,12 +687,15 @@ namespace QMAnalysisTransfer
             int i = 0;
             int 원소의총갯수 = 24; // 원소의 총 갯수  --> 나중에 환결설정 파일에 저장.
 
-            // 분석 성분 측정치인지 검사
-            if (TransReadData[i].Equals(''))
-            {
-                AnalysisData.GroupName = TransReadData.Substring(1, TransReadData.IndexOf('[') - 1).Trim(); //그룹을 구한다.
+            string UpperTransReadData = TransReadData.ToUpper(); //문자열을 대문자로 변환
 
-                AnalysisData.HeatNO = TransReadData.Substring(TransReadData.IndexOf('[') + 1, (TransReadData.IndexOf("Fe") - 1) - (TransReadData.IndexOf('[') + 1)).Trim(); //HeatNO를 구한다.
+
+            // 분석 성분 측정치인지 검사
+            if (UpperTransReadData[i].Equals(''))
+            {
+                AnalysisData.GroupName = UpperTransReadData.Substring(1, UpperTransReadData.IndexOf('[') - 1).Trim(); //그룹을 구한다.
+
+                AnalysisData.HeatNO = UpperTransReadData.Substring(UpperTransReadData.IndexOf('[') + 1, (UpperTransReadData.IndexOf("FE") - 1) - (UpperTransReadData.IndexOf('[') + 1)).Trim(); //HeatNO를 구한다.
 
                 AnalysisData.HeatNO = AnalysisData.HeatNO.Replace(" ", "");  //HeatNO에 공백을 완전히 지운다.
 
@@ -524,117 +730,71 @@ namespace QMAnalysisTransfer
                 //MessageBox.Show("--" + AnalysisData.HeatNO + " -- " + AnalysisData.JLT + "--");
 
 
-                int EleIndex = TransReadData.IndexOf("Fe");
+                int EleIndex = UpperTransReadData.IndexOf("FE");
                 //for (int ii = TransReadData.IndexOf("Fe"); ii < 원소의총갯수 * 12 - 12; ii += 5)
                 int sumii = 0;
                 for (int ii = 0; ii < 원소의총갯수; ii++)
                 {
+                    string aaa = UpperTransReadData.Substring(EleIndex + sumii, 5).Trim(); //"."
+                    if (aaa == "") break;
+                    float bbb = Convert.ToSingle(UpperTransReadData.Substring(EleIndex + sumii + 5, 6).Trim()); //"97.718"
 
-                    항목별로데이터저장(TransReadData.Substring(EleIndex + sumii, 5).Trim(), Convert.ToDouble(TransReadData.Substring(EleIndex + sumii + 5, 6).Trim()));
+                    항목별로데이터저장(aaa, bbb);
+                    //항목별로데이터저장(TransReadData.Substring(EleIndex + sumii, 5).Trim(), Convert.ToSingle(TransReadData.Substring(EleIndex + sumii + 5, 6).Trim()));
 
                     sumii += 12;
 
-                    if ((EleIndex + sumii + 5 + 7) > TransReadData.Length)
+                    if ((EleIndex + sumii + 5 + 7) > UpperTransReadData.Length)
                     {
                         break;
                     }
                 }
+                //------------------------------
 
-
-                string SendData;
-                //
-
-                string MnData = Math.Round(AnalysisData.Mn_Data * 100).ToString();
-                switch (MnData.Length)
-                {
-                    case 0:
-                        MnData = "000";
-                        break;
-                    case 1:
-                        MnData = "00" + MnData;
-                        break;
-                    case 2:
-                        MnData = "0" + MnData;
-                        break;
-                }
-
-                //int MnData = (int)Math.Round(AnalysisData.Mn_Data * 100);
-                /*
-                SendData = String.Format("A:{0}E0000F{1:00}G{2:00}H{3}I{4:00}J{5:00}K{6:00}L{7:00}M{8:00}N{9:00}",
-                                                                                                    AnalysisData.HeatNO.Substring(2, 4),
-                                                                                                    (int)Math.Round(AnalysisData.C_Data * 100),
-                                                                                                    Math.Round(AnalysisData.Si_Data * 100),
-                                                                                                    MnData,
-                                                                                                    (int)Math.Round(AnalysisData.P_Data * 1000),
-                                                                                                    (int)Math.Round(AnalysisData.S_Data * 1000),
-                                                                                                    (int)Math.Round(AnalysisData.Cu_Data * 100),
-                                                                                                    (int)Math.Round(AnalysisData.Cr_Data * 100),
-                                                                                                    (int)Math.Round(AnalysisData.CE_Data * 100),
-                                                                                                    (int)Math.Round(AnalysisData.V_Data * 1000));
-                                                                                                    
-                */
-
-                SendData = String.Format("A{0}B\0\n\nC\n\n\nD\n\n\nE0000F{1:00}G{2:00}H{3}I{4:00}J{5:00}K{6:00}L{7:00}M{8:00}N{9:00}",
-                                                                                                    AnalysisData.HeatNO.Substring(2, 4),
-                                                                                                    (int)Math.Round(AnalysisData.C_Data * 100),
-                                                                                                    Math.Round(AnalysisData.Si_Data * 100),
-                                                                                                    MnData,
-                                                                                                    (int)Math.Round(AnalysisData.P_Data * 1000),
-                                                                                                    (int)Math.Round(AnalysisData.S_Data * 1000),
-                                                                                                    (int)Math.Round(AnalysisData.Cu_Data * 100),
-                                                                                                    (int)Math.Round(AnalysisData.Cr_Data * 100),
-                                                                                                    (int)Math.Round(AnalysisData.CE_Data * 100),
-                                                                                                    (int)Math.Round(AnalysisData.V_Data * 1000));
-
-                //MessageBox.Show("SendData");
-
-                
-                
-                byte[] aassdd = Encoding.UTF8.GetBytes(SendData);
-
-
-                serial.Send(SendData);
-
-                
-                
                 this.Dispatcher.Invoke(new Action(delegate ()
                 {
-                    /*
-                    list.Add(new Sorting_Information(index++, ((Sort_Name)Kind.SelectedIndex).ToString(), ((Data_State)sort_state.SelectedIndex).ToString(), time)); 
-                    sortGrid.Items.Refresh();
-                     */
-
                     tbJLT.Text = AnalysisData.JLT;
 
-                    //var uriSource = new Uri(@"/이미지/녹색원 체크 표시.png", UriKind.Relative);
-                    //imTransOK.Source = new BitmapImage(uriSource);
-                    
-
                     transferdata.Add(new TransferData(AnalysisData.TransTimeData,
-                                                      AnalysisData.HeatNO, 
-                                                      AnalysisData.JLT, 
-                                                      ((int)Math.Round(AnalysisData.C_Data * 100)).ToString(),
-                                                      ((int)Math.Round(AnalysisData.Si_Data * 100)).ToString(),
-                                                      MnData,
-                                                      ((int)Math.Round(AnalysisData.P_Data * 1000)).ToString(),
-                                                      ((int)Math.Round(AnalysisData.S_Data * 1000)).ToString(),
-                                                      ((int)Math.Round(AnalysisData.Cu_Data * 100)).ToString(),
-                                                      ((int)Math.Round(AnalysisData.Cr_Data * 100)).ToString(),
-                                                      ((int)Math.Round(AnalysisData.CE_Data * 100)).ToString(),
-                                                      ((int)Math.Round(AnalysisData.V_Data * 1000)).ToString()));
+                                                      Convert.ToInt32(AnalysisData.HeatNO),
+                                                      AnalysisData.JLT,
+                                                      (int)Math.Round(AnalysisData.C_Data * 100),
+                                                      (int)Math.Round(AnalysisData.Si_Data * 100),
+                                                      (int)Math.Round(AnalysisData.Mn_Data * 100),
+                                                      (int)Math.Round(AnalysisData.P_Data * 1000),
+                                                      (int)Math.Round(AnalysisData.S_Data * 1000),
+                                                      (int)Math.Round(AnalysisData.Cu_Data * 100),
+                                                      (int)Math.Round(AnalysisData.Cr_Data * 100),
+                                                      (int)Math.Round(AnalysisData.CE_Data * 100),
+                                                      (int)Math.Round(AnalysisData.V_Data * 1000)));
                     dgTransferData.Items.Refresh();
-
 
                     if (AnalysisData.JLT == "용락")
                     {
                         FrontHeatNo = AnalysisData.HeatNO;
                     }
 
-
-
                     TransOKflag = true;
-                    //dataGrid.Items.Add(new TransferData() { Datetime= AnalysisData.TransTimeData, Heatno=AnalysisData.HeatNO, JLT=AnalysisData.JLT });
                 }));
+
+                //전송(송신)에 필요한 데이터 조합
+                string SendData;
+                SendData = String.Format("A{0}B\0\n\nC\n\n\nD\n\n\nE0000F{1}G{2}H{3}I{4}J{5}K{6}L{7}M{8}N{9}",
+                                          AnalysisData.HeatNO.Substring(2, 4),
+                                          transferdata[transferdata.Count - 1].Cdata.ToString("00"),
+                                          transferdata[transferdata.Count - 1].Sidata.ToString("00"),
+                                          transferdata[transferdata.Count - 1].Mndata.ToString("000"),
+                                          transferdata[transferdata.Count - 1].Pdata.ToString("00"),
+                                          transferdata[transferdata.Count - 1].Sdata.ToString("00"),
+                                          transferdata[transferdata.Count - 1].Cudata.ToString("00"),
+                                          transferdata[transferdata.Count - 1].Crdata.ToString("00"),
+                                          transferdata[transferdata.Count - 1].Nidata.ToString("00"),
+                                          transferdata[transferdata.Count - 1].Vdata.ToString("00"));
+
+                //실제 전송(송신)을 하는 부분
+                serial.Send(SendData);
+                
+               
                 
 
 
@@ -649,7 +809,7 @@ namespace QMAnalysisTransfer
             return 0;
         }
 
-        public bool 항목별로데이터저장(string EleName, double Value)
+        public bool 항목별로데이터저장(string EleName, float Value)
         {
             //MessageBox.Show(EleName.ToUpper()+" :: " + Value.ToString());
 
@@ -897,19 +1057,18 @@ namespace QMAnalysisTransfer
 
         void TransOKLamp()
         {
-                var uriSource = new Uri(@"/이미지/ok_accept_15562.png", UriKind.Relative);
+            var uriSource = new Uri(@"/이미지/ok_accept_15562.png", UriKind.Relative);
             imTransOK.Source = new BitmapImage(uriSource);
-                Onflag = false;
+            Onflag = false;
         }
 
+        void TransNGLamp()
+        {
+            var uriSource = new Uri(@"/이미지/빨간원 엑스 표시.png", UriKind.Relative);
 
-        bool TransOKflag = false;
-
-        string FrontHeatNo;
-        string FrontOnToTap;
-        string FrontTapToTap;
-        string FrontWatt;
-
+            imTransOK.Source = new BitmapImage(uriSource);
+            Onflag = false;
+        }
 
         private void DataReceivedHandler(byte[] receiveData)
         {
@@ -991,13 +1150,35 @@ namespace QMAnalysisTransfer
                                     this.Dispatcher.Invoke(new Action(delegate ()
                                     {
                                         // 출강
-                                        if( (EleValue == "0") && (FrontOnToTap != "0"))
+                                        if ((EleValue == "000") && (FrontOnToTap != "0") && (ElectricfurnaceWorkEndflag == false))
                                         {
+                                            //Debug.WriteLine("DateTime.Now : "+ DateTime.Now);
+                                            //Debug.WriteLine("FrontHeatNo : "+ FrontHeatNo);
+                                            //Debug.WriteLine("FrontOnToTap : " + FrontOnToTap);
+                                            //Debug.WriteLine("FrontTapToTap : "+ FrontTapToTap);
+                                            //Debug.WriteLine("FrontWatt : "+ FrontWatt);
+
+
                                             electricfurnaceworkenddata.Add(new ElectricfurnaceWorkEndData(DateTime.Now, FrontHeatNo, FrontOnToTap, FrontTapToTap, FrontWatt, "0"));
+                                            dgElectricfurnaceWorkEndData.Items.Refresh();
+
+                                            ElectricfurnaceWorkEndflag = true;
+
+                                            Debug.WriteLine("출강 데이터 기록");
                                         }
+                                        
 
                                         tbDisplayOnToTap.Text = EleValue;
-                                        FrontOnToTap = EleValue;
+
+                                        if (EleValue != "000")
+                                        {
+                                            FrontOnToTap = EleValue;
+                                            ElectricfurnaceWorkEndflag = false;
+                                        }
+
+                                        //Debug.WriteLine("EleValue : " + EleValue);
+
+                                        //Debug.WriteLine("FrontOnToTap : " + FrontOnToTap);
                                     }));
 
                                 }
@@ -1031,7 +1212,15 @@ namespace QMAnalysisTransfer
                                     this.Dispatcher.Invoke(new Action(delegate ()
                                     {
                                         tbDisplayTapToTap.Text = EleValue;
-                                        FrontTapToTap = EleValue;
+                                        //FrontTapToTap = EleValue;
+
+                                        //tbDisplayOnToTap.Text = EleValue;
+
+                                        if (EleValue != "000") FrontTapToTap = EleValue;
+
+                                        Debug.WriteLine("TapToTap EleValue : " + EleValue);
+
+                                        Debug.WriteLine("TapToTap FrontOnToTap : " + FrontTapToTap);
                                     }));
                                 }
                             }
@@ -1407,16 +1596,29 @@ namespace QMAnalysisTransfer
                 {
                     imTransOK.Source = null;
 
+                    /*
+                    SendData = String.Format("A{0}B\0\n\nC\n\n\nD\n\n\nE0000F{1}G{2}H{3}I{4}J{5}K{6}L{7}M{8}N{9}",
+                                          AnalysisData.HeatNO.Substring(2, 4),
+                                          transferdata[transferdata.Count - 1].Cdata.ToString("00"),
+                                          transferdata[transferdata.Count - 1].Sidata.ToString("00"),
+                                          transferdata[transferdata.Count - 1].Mndata.ToString("000"),
+                                          transferdata[transferdata.Count - 1].Pdata.ToString("00"),
+                                          transferdata[transferdata.Count - 1].Sdata.ToString("00"),
+                                          transferdata[transferdata.Count - 1].Cudata.ToString("00"),
+                                          transferdata[transferdata.Count - 1].Crdata.ToString("00"),
+                                          transferdata[transferdata.Count - 1].Nidata.ToString("00"),
+                                          transferdata[transferdata.Count - 1].Vdata.ToString("00"));
+                    */
                     if ((tbDisplayHeatNo.Text == AnalysisData.HeatNO.Substring(2, 4)) &&
-                         (tbDisplayC.Text == ((int)Math.Round(AnalysisData.C_Data * 100)).ToString()) &&
-                         (tbDisplaySi.Text == ((int)Math.Round(AnalysisData.Si_Data * 100)).ToString()) &&
-                         (tbDisplayMn.Text == MnData) &&
-                         (tbDisplayP.Text == ((int)Math.Round(AnalysisData.P_Data * 1000)).ToString()) &&
-                         (tbDisplayS.Text == ((int)Math.Round(AnalysisData.S_Data * 1000)).ToString()) &&
-                         (tbDisplayCu.Text == ((int)Math.Round(AnalysisData.Cu_Data * 100)).ToString()) &&
-                         (tbDisplayCr.Text == ((int)Math.Round(AnalysisData.Cr_Data * 100)).ToString()) &&
-                         (tbDisplayNi.Text == ((int)Math.Round(AnalysisData.CE_Data * 100)).ToString()) &&
-                         (tbDisplayV.Text == ((int)Math.Round(AnalysisData.V_Data * 1000)).ToString()))
+                         (tbDisplayC.Text == transferdata[transferdata.Count - 1].Cdata.ToString("00")) &&
+                         (tbDisplaySi.Text == transferdata[transferdata.Count - 1].Sidata.ToString("00")) &&
+                         (tbDisplayMn.Text == transferdata[transferdata.Count - 1].Mndata.ToString("000")) &&
+                         (tbDisplayP.Text == transferdata[transferdata.Count - 1].Pdata.ToString("00")) &&
+                         (tbDisplayS.Text == transferdata[transferdata.Count - 1].Sdata.ToString("00")) &&
+                         (tbDisplayCu.Text == transferdata[transferdata.Count - 1].Cudata.ToString("00")) &&
+                         (tbDisplayCr.Text == transferdata[transferdata.Count - 1].Crdata.ToString("00")) &&
+                         (tbDisplayNi.Text == transferdata[transferdata.Count - 1].Nidata.ToString("00")) &&
+                         (tbDisplayV.Text == transferdata[transferdata.Count - 1].Vdata.ToString("00")))
                     {
                         Debug.WriteLine("전송성분이 재대로 전송이 되었다.");
 
@@ -1426,6 +1628,8 @@ namespace QMAnalysisTransfer
                     }
                     else
                     {
+                        TransNGLamp();
+
                         Debug.WriteLine("재전송해야 합니다.");
 
                         Debug.WriteLine(((int)Math.Round(AnalysisData.C_Data * 100)).ToString());
@@ -1458,344 +1662,6 @@ namespace QMAnalysisTransfer
         }
 
         #endregion
-    }
-
-    //List<TransferData> transferdata = new List<TransferData>();
-    //dgTransferData.ItemsSource = transferdata;
-    class TransferData : INotifyPropertyChanged
-    {
-        DateTime _Datetime { set; get; }
-        public DateTime Datetime
-        {
-            set
-            {
-                _Datetime = value;
-                Notify("Datetime");
-            }
-            get
-            {
-                return _Datetime;
-            }
-        }
-
-        string _HeatNo { set; get; }
-        public string HeatNo
-        {
-            set
-            {
-                _HeatNo = value;
-                Notify("HeatNo");
-            }
-            get
-            {
-                return _HeatNo;
-            }
-        }
-
-
-        string _JLT { set; get; }
-        public string JLT
-        {
-            set
-            {
-                _JLT = value;
-                Notify("JLT");
-            }
-            get
-            {
-                return _JLT;
-            }
-        }
-
-
-        string _Cdata { set; get; }
-        public string Cdata
-        {
-            set
-            {
-                _Cdata = value;
-                Notify("Cdata");
-            }
-            get
-            {
-                return _Cdata;
-            }
-        }
-
-
-        string _Sidata { set; get; }
-        public string Sidata
-        {
-            set
-            {
-                _Sidata = value;
-                Notify("Sidata");
-            }
-            get
-            {
-                return _Sidata;
-            }
-        }
-
-        string _Mndata { set; get; }
-        public string Mndata
-        {
-            set
-            {
-                _Mndata = value;
-                Notify("Mndata");
-            }
-            get
-            {
-                return _Mndata;
-            }
-        }
-
-        string _Pdata { set; get; }
-        public string Pdata
-        {
-            set
-            {
-                _Pdata = value;
-                Notify("Pdata");
-            }
-            get
-            {
-                return _Pdata;
-            }
-        }
-
-        string _Sdata { set; get; }
-        public string Sdata
-        {
-            set
-            {
-                _Sdata = value;
-                Notify("Sdata");
-            }
-            get
-            {
-                return _Sdata;
-            }
-        }
-
-        string _Cudata { set; get; }
-        public string Cudata
-        {
-            set
-            {
-                _Cudata = value;
-                Notify("Cudata");
-            }
-            get
-            {
-                return _Cudata;
-            }
-        }
-
-        string _Crdata { set; get; }
-        public string Crdata
-        {
-            set
-            {
-                _Crdata = value;
-                Notify("Crdata");
-            }
-            get
-            {
-                return _Crdata;
-            }
-        }
-
-        string _Nidata { set; get; }
-        public string Nidata
-        {
-            set
-            {
-                _Nidata = value;
-                Notify("Nidata");
-            }
-            get
-            {
-                return _Nidata;
-            }
-        }
-
-        string _Vdata { set; get; }
-        public string Vdata
-        {
-            set
-            {
-                _Vdata = value;
-                Notify("Vdata");
-            }
-            get
-            {
-                return _Vdata;
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public TransferData(DateTime datetime, string heatno, string jlt, string cdata, string sidata, string mndata, string pdata, string sdata, string cudata, string crdata, string nidata, string vdata)
-        {
-
-            this.Datetime = datetime;
-            this.HeatNo = heatno;
-            this.JLT = jlt;
-            this.Cdata = cdata;
-            this.Sidata = sidata;
-            this.Mndata = mndata;
-            this.Pdata = pdata;
-            this.Sdata = sdata;
-            this.Cudata = cudata;
-            this.Crdata = crdata;
-            this.Nidata = nidata;
-            this.Vdata = vdata;
-        }
-
-        protected void Notify(string propName)
-        {
-            if (this.PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propName));
-            }
-        }
-
-    }
-
-    //List<ElectricfurnaceWorkEndData> electricfurnaceworkenddata = new List<ElectricfurnaceWorkEndData>();
-    //dgElectricfurnaceWorkEndData.ItemsSource = electricfurnaceworkenddata;
-    //전기로 출강 정보
-    class ElectricfurnaceWorkEndData : INotifyPropertyChanged
-    {
-        DateTime _Datetime { set; get; }
-        public DateTime Datetime
-        {
-            set
-            {
-                _Datetime = value;
-                Notify("Datetime");
-            }
-            get
-            {
-                return _Datetime;
-            }
-        }
-
-        string _HeatNo { set; get; }
-        public string HeatNo
-        {
-            set
-            {
-                _HeatNo = value;
-                Notify("HeatNo");
-            }
-            get
-            {
-                return _HeatNo;
-            }
-        }
-
-
-        
-
-
-        string _OnToTap { set; get; }
-        public string OnToTap
-        {
-            set
-            {
-                _OnToTap = value;
-                Notify("OnToTap");
-            }
-            get
-            {
-                return _OnToTap;
-            }
-        }
-
-
-        string _TapToTap { set; get; }
-        public string TapToTap
-        {
-            set
-            {
-                _TapToTap = value;
-                Notify("TapToTap");
-            }
-            get
-            {
-                return _TapToTap;
-            }
-        }
-
-        string _Watt { set; get; }
-        public string Watt
-        {
-            set
-            {
-                _Watt = value;
-                Notify("Watt");
-            }
-            get
-            {
-                return _Watt;
-            }
-        }
-
-        string _OffToTap { set; get; }
-        public string OffToTap
-        {
-            set
-            {
-                _OffToTap = value;
-                Notify("OffToTap");
-            }
-            get
-            {
-                return _OffToTap;
-            }
-        }
-
-        string _Temp { set; get; }
-        public string Temp
-        {
-            set
-            {
-                _Temp = value;
-                Notify("Temp");
-            }
-            get
-            {
-                return _Temp;
-            }
-        }
-
-
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public ElectricfurnaceWorkEndData(DateTime datetime, string heatno, string ontotap, string taptotap, string watt, string temp)
-        {
-
-            this.Datetime = datetime;
-            this.HeatNo = heatno;
-            this.OnToTap = ontotap;
-            this.TapToTap = taptotap;
-            this.Watt = watt;
-            this.Temp = temp;
-            this.OffToTap = (int.Parse(taptotap) - int.Parse(ontotap)).ToString();
-        }
-
-        protected void Notify(string propName)
-        {
-            if (this.PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propName));
-            }
-        }
-
     }
 
     
